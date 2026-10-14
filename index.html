@@ -221,6 +221,7 @@ body.shop .wrap{padding-block-end:40px}
 .srow .sn b{font-size:15.5px;font-weight:800;overflow-wrap:anywhere}
 .srow .sn span{font-size:12.5px;color:var(--muted);font-weight:600}
 .srow .qty button{width:34px;height:34px}
+.btn.danger{border-color:var(--over);color:var(--over)}
 .sx{border:0;background:var(--bg);width:34px;height:34px;border-radius:50%;font-size:20px;line-height:1;color:var(--over);flex:none}
 .chip{border:0;cursor:pointer;color:inherit;font-family:inherit;font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--bg)}
 h2.sect{font-weight:800;font-size:24px;margin:26px 0 0}
@@ -967,7 +968,7 @@ $("#budgetBtn").onclick=()=>{const f=$("#budgetForm");f.hidden=!f.hidden;$("#sto
 $("#budgetForm").addEventListener("submit",e=>{e.preventDefault();const p=parsePounds($("#budgetInput").value);if(!p){toast("Enter a budget, like 60");return}S.budget=p;$("#budgetForm").hidden=true;persist();render();toast("Budget set to "+gbp(p))});
 
 // ---------- staples ----------
-let editingSaved=null;
+let editingSaved=null, confirmDelSaved=null;
 // Find products for any search box: full Aldi range when loaded, else the built-in list, plus the household's own items
 function findProducts(text,limit){
   const q=norm(text).trim(); if(!q) return [];
@@ -978,13 +979,22 @@ function findProducts(text,limit){
   for(const [k,c] of Object.entries(S.custom).filter(([k,c])=>has(norm(c.name))).slice(0,3)) out.push({item:{cref:k},img:""});
   return out;
 }
+function wireDelete(c,L,idx){
+  // Remember the first tap by list position and name, so a sync or refresh in between doesn't cancel it
+  const del=c.querySelector(".del"); if(!del) return; const key=idx+"|"+L.name;
+  if(confirmDelSaved===key){del.textContent="Tap again to delete";del.classList.add("danger")}
+  del.onclick=e=>{e.stopPropagation();
+    if(confirmDelSaved===key){const i=S.saved.findIndex((x,j)=>j===idx&&x.name===L.name);if(i>=0)S.saved.splice(i,1);confirmDelSaved=null;editingSaved=null;persist();render();toast("Deleted "+L.name);return}
+    confirmDelSaved=key;render();
+    setTimeout(()=>{if(confirmDelSaved===key){confirmDelSaved=null;render()}},5000)};
+}
 function savedEditor(L,idx){
   const c=document.createElement("div"); c.className="card sedit";
   c.innerHTML=`<label class="srename"><span class="lbl">List name</span><input class="field" id="se-name" value="${esc(L.name)}"></label>
     <div class="srows"></div>
     <label class="searchbox" for="se-search"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="se-search" type="search" autocomplete="off" placeholder="Add an item to ${esc(L.name)}"></label>
     <div class="results" id="se-results" hidden></div>
-    <div class="row" style="margin-top:12px"><button class="btn sdone">Done</button><button class="btn ghost small sfrom">Replace with this week's list</button></div>`;
+    <div class="row" style="margin-top:12px"><button class="btn sdone">Done</button><button class="btn ghost small sfrom">Replace with this week's list</button><button class="btn ghost small del">Delete list</button></div>`;
   const rows=c.querySelector(".srows");
   if(!L.items.length) rows.innerHTML='<p style="margin:0">No items yet. Search below to add some.</p>';
   L.items.forEach((it,i)=>{const f=info(it);
@@ -1019,6 +1029,7 @@ function savedEditor(L,idx){
         if(!L.items.some(y=>y.cref===k))L.items.push({cref:k,qty:1});persist();render();toast("Added "+name+" to "+L.name)};
       res.appendChild(own);}
     res.hidden=!sb.value.trim();};
+  wireDelete(c,L,idx);
   c.querySelector(".sdone").onclick=()=>{const v=nm.value.trim();if(v)L.name=v;editingSaved=null;persist();render();toast("Saved "+L.name)};
   c.querySelector(".sfrom").onclick=()=>{if(!S.list.length){toast("This week's list is empty");return}L.items=S.list.map(x=>({ref:x.ref||null,cref:x.cref||null,sku:x.sku||null,snap:x.snap||null,qty:x.qty}));persist();render();toast(L.name+" now matches this week's list")};
   return c;
@@ -1032,10 +1043,11 @@ function renderStaples(){
     const c=document.createElement("div"); c.className="card";
     if(editingSaved===idx){a.appendChild(savedEditor(L,idx));return}
     if(!L.items.length){
-      c.innerHTML=`<h3></h3><p>Nothing in here yet. Build this week's list, then tap "Save current list here", and it'll go on every new list automatically.</p><div class="row"><button class="btn small additems">Add items</button><button class="btn ghost small usecur">Save current list here</button><button class="btn ghost small starter">Use a starter list</button></div><p style="margin-top:8px">The starter list has 15 everyday Aldi items, like milk, bread, bananas and fish fingers. You can change it after.</p>`;
+      c.innerHTML=`<h3></h3><p>Nothing in here yet. Build this week's list, then tap "Save current list here", and it'll go on every new list automatically.</p><div class="row"><button class="btn small additems">Add items</button><button class="btn ghost small usecur">Save current list here</button><button class="btn ghost small starter">Use a starter list</button><button class="btn ghost small del">Delete</button></div><p style="margin-top:8px">The starter list has 15 everyday Aldi items, like milk, bread, bananas and fish fingers. You can change it after.</p>`;
       c.querySelector("h3").textContent=L.name;
       c.querySelector(".usecur").onclick=()=>{if(!S.list.length){toast("Add some items to this week's list first");return}L.items=S.list.map(x=>({ref:x.ref||null,cref:x.cref||null,sku:x.sku||null,snap:x.snap||null,qty:x.qty}));persist();render();toast("Saved "+L.name)};
       c.querySelector(".starter").onclick=()=>{loadStarter(L);persist();render();toast("Starter list loaded into "+L.name)};
+      wireDelete(c,L,idx);
       c.querySelector(".additems").onclick=()=>{editingSaved=idx;render();setTimeout(()=>{const i=document.getElementById("se-search");if(i)i.focus()},50)};
       a.appendChild(c); return;
     }
@@ -1046,8 +1058,7 @@ function renderStaples(){
     for(const it of L.items){const s=document.createElement("button");s.className="chip";s.textContent=(it.qty>1?it.qty+"× ":"")+info(it).name;s.onclick=()=>{editingSaved=idx;render()};ch.appendChild(s)}
     c.querySelector(".add").onclick=()=>{dropExample();for(const it of L.items)addItem({ref:it.ref||undefined,cref:it.cref||undefined,sku:it.sku||undefined,snap:it.snap||undefined,qty:it.qty});persist();render();switchTab("list");toast("Added "+L.name)};
     c.querySelector(".edit").onclick=()=>{editingSaved=idx;render()};
-    const del=c.querySelector(".del");
-    del.onclick=()=>{if(del.dataset.sure){S.saved.splice(idx,1);persist();render()}else{del.dataset.sure="1";del.textContent="Tap again to delete"}};
+    wireDelete(c,L,idx);
     a.appendChild(c);
   });
   const h=$("#historyArea");
