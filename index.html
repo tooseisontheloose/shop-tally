@@ -108,6 +108,12 @@ button{cursor:pointer}
 .res .n span{display:block;font-size:13px;color:var(--muted);font-weight:600}
 .res .p{font-weight:800;font-variant-numeric:tabular-nums}
 .res.custom .n{color:var(--accent)}
+.res .resmain{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:none;padding:0;text-align:left;min-height:44px}
+div.res{padding-right:10px}
+.res .plus{width:44px;height:44px;flex:none;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);font-size:24px;font-weight:800;line-height:1;display:grid;place-items:center}
+.res .plus.on{background:var(--yellow);color:var(--yellow-ink);font-size:17px}
+.res .plus:active{transform:scale(.92)}
+.onlist{font-style:normal;color:var(--accent);font-weight:800;margin-left:6px;white-space:nowrap}
 .res.more{justify-content:space-between;min-height:52px}
 .res.more .n{color:var(--accent);font-weight:800}
 .res.more .p{font-size:13.5px;color:var(--muted);font-weight:700}
@@ -243,7 +249,8 @@ nav.tabs .in{display:flex;max-width:528px;width:100%;background:var(--nav);borde
 nav.tabs button{flex:1;border:0;background:none;padding:6px 4px;border-radius:18px;font-weight:800;color:var(--nav-ink);font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:52px;justify-content:center}
 nav.tabs button svg{width:24px;height:24px}
 nav.tabs button[aria-selected="true"]{color:var(--yellow)}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:14px;font-size:14px;font-weight:700;z-index:9;max-width:calc(100% - 40px)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:14px;font-size:14px;font-weight:700;z-index:9;max-width:calc(100% - 40px);display:flex;align-items:center;gap:14px}
+.toast .undo{border:0;background:none;color:var(--yellow);font-weight:800;padding:4px 2px;min-height:32px}
 </style>
 </head>
 <body>
@@ -878,6 +885,21 @@ function rangeMatches(text){
 }
 let searchShown=12;
 search.addEventListener("input",()=>{searchShown=12;drawResults()});
+function resultRow(item,img,f,subText){
+  const row=document.createElement("div"); row.className="res";
+  const on=S.list.find(y=>sameItem(y,item));
+  row.innerHTML=`<button class="resmain" aria-label="Choose how many ${esc(f.name)}"><span class="thumb">${img?`<img src="${imgUrl(img,120)}" alt="" loading="lazy">`:iconFor(f)}</span><span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span></button>
+    <button class="plus${on?" on":""}" aria-label="Add one ${esc(f.name)}">${on?`<span>${on.qty}</span>`:"+"}</button>`;
+  const ti=row.querySelector(".thumb img"); if(ti) ti.onerror=()=>{ti.parentNode.innerHTML=iconFor(f)};
+  row.querySelector(".n").innerHTML=esc(f.name)+`<span>${esc(subText)}${on?`<em class="onlist">On list × ${on.qty}</em>`:""}</span>`;
+  row.querySelector(".resmain").onclick=()=>openAdd(item,img);
+  row.querySelector(".plus").onclick=()=>{
+    const before=S.list.find(y=>sameItem(y,item)); const was=before?before.qty:0;
+    dropExample(); addItem({...item,qty:1}); haptic(); persist(); render(); drawResults();
+    toast((was?"Now "+(was+1)+" × ":"Added ")+f.name,()=>{const x=S.list.find(y=>sameItem(y,item));if(!x)return;
+      if(x.qty>1)x.qty--;else S.list=S.list.filter(y=>y!==x);persist();render();if(!results.hidden)drawResults()})};
+  return row;
+}
 function drawResults(){
   $("#addPanel").hidden=true;
   const q=norm(search.value).trim();
@@ -889,33 +911,15 @@ function drawResults(){
   const customs=Object.entries(S.custom).filter(([k,c])=>has(norm(c.name))).slice(0,4);
   results.innerHTML="";
   if(all.length){const hd=document.createElement("div");hd.className="rescount";hd.textContent=all.length===1?"1 Aldi product":`${all.length} Aldi products`;results.appendChild(hd)}
-  for(const c of hits){ const own=info({ref:c.id}).price;
-    const b=document.createElement("button"); b.className="res";
-    b.innerHTML=`<span class="n"></span><span class="p">${gbp(own!=null?own:c.price)}</span>`;
-    b.querySelector(".n").innerHTML=esc(c.name)+`<span>${esc([c.brand,c.size].filter(Boolean).join(" · "))}</span>`;
-    b.onclick=()=>openAdd({ref:c.id});
-    results.appendChild(b);
-  }
-  for(const x of rhits){ const f=info({sku:x.s});
-    const b=document.createElement("button"); b.className="res";
-    b.innerHTML=`<span class="thumb">${x.i?`<img src="${imgUrl(x.i,120)}" alt="" loading="lazy">`:iconFor(f)}</span><span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;
-    const ti=b.querySelector(".thumb img"); if(ti) ti.onerror=()=>{ti.parentNode.innerHTML=iconFor(f)};
-    b.querySelector(".n").innerHTML=esc(f.name)+`<span>${esc([f.brand,f.size].filter(Boolean).join(" · ")||(f.needs?"Add the price in the shop":""))}</span>`;
-    b.onclick=()=>{const r=fromRange(x);openAdd({sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a,i:r.i}},x.i)};
-    results.appendChild(b);
-  }
+  for(const c of hits){const item={ref:c.id},f=info(item);results.appendChild(resultRow(item,"",f,[f.brand,f.size].filter(Boolean).join(" · ")))}
+  for(const x of rhits){const r=fromRange(x),item={sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a,i:r.i}},f=info(item);
+    results.appendChild(resultRow(item,x.i,f,[f.brand,f.size].filter(Boolean).join(" · ")||(f.needs?"Add the price in the shop":"")))}
   if(all.length>searchShown){const more=document.createElement("button");more.className="res more";
     const n=Math.min(20,all.length-searchShown);
     more.innerHTML=`<span class="n">Show ${n} more</span><span class="p">${all.length-searchShown} left</span>`;
-    more.onclick=()=>{searchShown+=20;drawResults();const r=results.querySelectorAll(".res:not(.more):not(.custom)");const t=r[searchShown-20];if(t)t.scrollIntoView({block:"nearest"})};
+    more.onclick=()=>{searchShown+=20;drawResults();const r=results.querySelectorAll(".res:not(.more):not(.custom):not(.rescount)");const t=r[searchShown-20];if(t)t.scrollIntoView({block:"nearest"})};
     results.appendChild(more)}
-  for(const [k,c] of customs){
-    const b=document.createElement("button"); b.className="res";
-    {const f=info({cref:k});b.innerHTML=`<span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;}
-    b.querySelector(".n").innerHTML=esc(c.name)+'<span>Your item</span>';
-    b.onclick=()=>openAdd({cref:k});
-    results.appendChild(b);
-  }
+  for(const [k] of customs){const item={cref:k},f=info(item);results.appendChild(resultRow(item,"",f,"Your item"))}
   const add=document.createElement("button"); add.className="res custom";
   add.innerHTML=`<span class="n">Add “${esc(search.value.trim())}” with my own price</span>`;
   add.onclick=()=>{results.hidden=true;$("#customForm").hidden=false;$("#customName").value=search.value.trim();$("#customPrice").focus()};
@@ -1094,7 +1098,9 @@ $("#storeBtn").onclick=()=>{const f=$("#storeForm");f.hidden=!f.hidden;$("#budge
 $("#storeForm").addEventListener("submit",e=>{e.preventDefault();const v=$("#storeInput").value.trim().replace(/^aldi,?\s*/i,"");if(!v){toast("Type your Aldi's town or area");return}S.store=v;$("#storeForm").hidden=true;persist();render();toast("Store set to Aldi, "+v)});
 document.addEventListener("click",e=>{if(openKey&&!e.target.closest(".item.open")){openKey=null;render()}});
 $("#goHousehold").onclick=()=>switchTab("about");
-let tt; function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2000)}
+let tt; function toast(m,undo){const t=$("#toast");t.textContent=m;
+  if(undo){const u=document.createElement("button");u.className="undo";u.textContent="Undo";u.onclick=()=>{t.hidden=true;undo()};t.appendChild(u)}
+  t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,undo?4000:2000)}
 
 render();
 })();
