@@ -352,7 +352,7 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
 (function(){
 const CHECKED = "14 Oct 2026";
 // Tosie's walk round her Aldi, in order
-const AISLES = ["Fruits & Vegetables","Crisps & Nuts","Tins & Jars","Eggs","Potatoes & Onions","Pasta & Rice","Meat & Fish","Juice & Drinks","Milk & Cheese","Yoghurts & Desserts","Middle Aisle","Baby & Care","Household","Frozen & Convenience","Cereals","Snacks & Sweets","Bread & Pastries","Tea & Coffee","Other"];
+const AISLES = ["Fruits & Vegetables","Crisps & Nuts","Tins & Jars","Eggs","Potatoes & Onions","Pasta & Rice","Meat & Fish","Chilled & Ready Meals","Juice & Drinks","Milk & Cheese","Yoghurts & Desserts","Middle Aisle","Baby & Care","Household","Frozen & Convenience","Cereals","Snacks & Sweets","Bread & Pastries","Tea & Coffee","Other"];
 const AISLE_RULES=[
  ["Tea & Coffee",/coffee|\btea\b|tea bags|hot chocolate/],
  ["Juice & Drinks",/juice|smoothie|squash|\bwater\b|\bcola\b|lemonade|fizzy/],
@@ -563,7 +563,8 @@ const CAT_AISLE={"Fresh Food":"Fruits & Vegetables","Bakery":"Bread & Pastries",
 const SUB_AISLE={
  "Fruit":"Fruits & Vegetables","Vegetables":"Fruits & Vegetables","Stir Fry Vegetables, Sauce & Noodles":"Fruits & Vegetables",
  "Bacon & Sausages":"Meat & Fish","Beef":"Meat & Fish","Black Pudding, Haggis & Stuffing":"Meat & Fish","Breaded Fish & Fishcakes":"Meat & Fish","Fish":"Meat & Fish","Lamb":"Meat & Fish","Pork & Gammon":"Meat & Fish","Poultry":"Meat & Fish","Seafood & Prawns":"Meat & Fish",
- "Chilled Meats":"Meat & Fish","Food To Go":"Meat & Fish","Meat Substitutes":"Meat & Fish","Party Food, Pies & Salads":"Meat & Fish","Pizza, Pasta & Garlic Bread":"Meat & Fish","Ready Meals":"Meat & Fish","Sides & Starters":"Meat & Fish","Soups":"Meat & Fish","Chilled Vegan":"Meat & Fish","Chilled Vegetarian":"Meat & Fish",
+ "Chilled Meats":"Meat & Fish",
+ "Food To Go":"Chilled & Ready Meals","Meat Substitutes":"Chilled & Ready Meals","Party Food, Pies & Salads":"Chilled & Ready Meals","Pizza, Pasta & Garlic Bread":"Chilled & Ready Meals","Ready Meals":"Chilled & Ready Meals","Sides & Starters":"Chilled & Ready Meals","Soups":"Chilled & Ready Meals","Chilled Vegan":"Chilled & Ready Meals","Chilled Vegetarian":"Chilled & Ready Meals",
  "Cheese":"Milk & Cheese","Dairy":"Milk & Cheese","Milk":"Milk & Cheese","Eggs":"Eggs",
  "Yogurts":"Yoghurts & Desserts","Chilled Desserts":"Yoghurts & Desserts",
  "Crisps & Snacks":"Crisps & Nuts","Seeds, Nuts & Dried Fruits":"Crisps & Nuts",
@@ -587,6 +588,7 @@ function rangeAisle(name,c,d){
   // A few refinements inside Aldi's broader sections
   if(sub==="Fruits & Vegetables"&&/potato|onion/.test(n)) return "Potatoes & Onions";
   if(sub==="Milk & Cheese"&&/yog|fromage/.test(n)) return "Yoghurts & Desserts";
+  if(sub==="Chilled & Ready Meals"&&/baby leaf|salad leaves|lettuce|rocket|watercress|spinach|salad bowl|mixed leaf/.test(n)) return "Fruits & Vegetables";
   if(sub) return sub;
   if(TOP_AISLE[c]) return TOP_AISLE[c];
   const a=aisleFor(name); if(a!=="Other") return a;
@@ -637,7 +639,7 @@ function dropExample(){if(S.example){S.list=[];S.example=false}}
 
 // ---------- render ----------
 const AISLE_LOOK={"Fruits & Vegetables":["🥦","#DDEFD3"],"Crisps & Nuts":["🥨","#F6E6C8"],"Tins & Jars":["🥫","#F6D9D2"],"Eggs":["🥚","#F4EBD3"],
- "Potatoes & Onions":["🥔","#F2E4CC"],"Pasta & Rice":["🍝","#F7E7C2"],"Meat & Fish":["🐟","#F5D9DC"],"Juice & Drinks":["🧃","#FBE5C8"],
+ "Potatoes & Onions":["🥔","#F2E4CC"],"Pasta & Rice":["🍝","#F7E7C2"],"Meat & Fish":["🐟","#F5D9DC"],"Chilled & Ready Meals":["🥪","#F3E6D9"],"Juice & Drinks":["🧃","#FBE5C8"],
  "Milk & Cheese":["🧀","#DCE7F6"],"Yoghurts & Desserts":["🍦","#EADFF3"],"Middle Aisle":["🛍️","#E6E2DA"],"Baby & Care":["🧴","#DDEEF0"],
  "Household":["🧻","#E3E8EA"],"Frozen & Convenience":["🧊","#D9ECF6"],"Cereals":["🥣","#F6E9CF"],"Snacks & Sweets":["🍫","#EDDCD2"],
  "Bread & Pastries":["🍞","#F3E3CB"],"Tea & Coffee":["☕","#E9DED3"],"Other":["🛒","#E6E2DA"]};
@@ -809,7 +811,8 @@ async function setShop(on){
   render(); window.scrollTo(0,0);
 }
 document.addEventListener("visibilitychange",async()=>{if(shopMode&&document.visibilityState==="visible"&&navigator.wakeLock){try{wakeLock=await navigator.wakeLock.request("screen")}catch(e){}}});
-function aisleOrder(){const o=(S.aisles||[]).filter(a=>AISLES.includes(a));for(const a of AISLES)if(!o.includes(a))o.push(a);return o}
+function aisleOrder(){const o=(S.aisles||[]).filter(a=>AISLES.includes(a));
+  AISLES.forEach((a,i)=>{if(o.includes(a))return;let at=o.length;for(let j=i-1;j>=0;j--){const k=o.indexOf(AISLES[j]);if(k>=0){at=k+1;break}}o.splice(at,0,a)});return o}
 function renderAisles(){
   const box=$("#aisleArea"); if(!box) return; box.innerHTML="";
   const o=aisleOrder();
