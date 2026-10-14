@@ -583,6 +583,9 @@ const SUB_AISLE={
  "Coffee":"Tea & Coffee","Tea":"Tea & Coffee","Hot Chocolate & Malted Drinks":"Tea & Coffee"
 };
 const TOP_AISLE={"SpecialBuys":"Middle Aisle","Christmas & New Year":"Middle Aisle","Autumn Range":"Middle Aisle","Frozen Food":"Frozen & Convenience","Bakery":"Bread & Pastries","Alcohol":"Juice & Drinks","Home Essentials":"Household","Pet Care":"Household","Health & Beauty":"Baby & Care","Baby & Toddler":"Baby & Care"};
+function niceName(n){return n.replace(/\s*<?\d+(\.\d+)?%\s*Fat\b/ig,"").replace(/\s{2,}/g," ").trim()}
+function niceSize(name,z){const m=/milk/i.test(name)&&!/milk chocolate|biscuit|evaporated|condensed|powder|coconut/i.test(name)&&/^([\d.]+)\s*l$/i.exec(z||"");
+  if(!m) return z||""; const pt=Math.round(parseFloat(m[1])*1.7598*4)/4; return (pt%1===0?pt:pt.toFixed(2).replace(/0$/,""))+" pints"}
 function rangeAisle(name,c,d){
   const n=(name||"").toLowerCase(), sub=SUB_AISLE[d];
   // A few refinements inside Aldi's broader sections
@@ -599,7 +602,7 @@ function fromRange(r){return {name:niceName(r.n),brand:titleCase(r.b),size:niceS
 function imgUrl(i,w){return i?`https://dm.emea.cms.aldi.cx/is/image/aldiprodeu/product/jpg/scaleWidth/${w||160}/${i}`:""}
 async function loadRange(){
   try{const r=await fetch("catalogue.json",{cache:"no-cache"});if(!r.ok)return;const j=await r.json();
-    RANGE=(j.products||[]).map(x=>({...x,h:norm(niceName(x.n)+" "+x.b+" "+x.z),nn:norm(niceName(x.n)).replace(/\s+/g," ").trim()}));RANGE_BY={};for(const x of RANGE)RANGE_BY[x.s]=x;render();}catch(e){}
+    RANGE=(j.products||[]).map(x=>({...x,h:norm(niceName(x.n)+" "+x.b+" "+x.z),nn:norm(niceName(x.n)).replace(/\s+/g," ").trim()}));RANGE_BY={};for(const x of RANGE)RANGE_BY[x.s]=x;render();}catch(e){console.error("Could not load Aldi range",e)}
 }
 function info(it){
   if(it.sku){const r=RANGE_BY[it.sku], base=r?fromRange(r):(it.snap||{name:"Item",brand:"",size:"",price:0}), own=ownOf(S.myPrices["s"+it.sku]);
