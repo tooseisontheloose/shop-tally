@@ -53,7 +53,11 @@ button{cursor:pointer}
 .store{border:0;background:var(--band-chip);color:var(--band-ink);font-weight:700;font-size:15px;height:36px;padding:0 12px 0 10px;border-radius:999px;display:flex;align-items:center;gap:6px;min-width:0}
 .store span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .store svg{flex:none}
-.shopbtn{border:0;background:var(--yellow);color:var(--yellow-ink);font-weight:800;font-size:15px;height:36px;padding:0 14px;border-radius:999px;display:flex;align-items:center;gap:6px;flex:none}
+.shopbtn{border:0;background:var(--yellow);color:var(--yellow-ink);font-weight:800;font-size:15px;height:36px;padding:0 14px;border-radius:999px;display:flex;align-items:center;gap:6px;flex:none;white-space:nowrap}
+.shopbtn.on{background:var(--band-chip);color:var(--band-ink);box-shadow:inset 0 0 0 1.5px var(--band-sub)}
+.modetag{display:none;align-self:flex-start;margin-top:10px;background:var(--yellow);color:var(--yellow-ink);font-weight:800;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+body.shop .modetag{display:inline-flex;align-items:center;gap:6px}
+body.shop .band h1{margin-top:6px}
 .band h1{margin:12px 0 0;font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
 .subline{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:var(--band-sub);font-size:15px;font-weight:600}
 .sync{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--band-chip);color:var(--band-ink);white-space:nowrap}
@@ -199,9 +203,32 @@ body.shop .wrap{padding-block-end:40px}
 .empty{margin-top:22px;text-align:center;color:var(--muted);padding:26px 16px;border:2px dashed var(--line);border-radius:20px;font-weight:600}
 .empty b{display:block;color:var(--ink);font-size:20px;font-weight:800;margin-bottom:4px}
 .example{margin-top:14px;font-size:14px;font-weight:600;background:var(--accent-soft);border-radius:16px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
-.confirm{margin-top:12px;background:var(--surface);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 24px var(--shadow)}
-.confirm .row{display:flex;gap:8px;flex-wrap:wrap}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.actions:empty{display:none}
+.cta{border:0;width:100%;border-radius:18px;padding:14px 18px;min-height:64px;display:flex;align-items:center;gap:14px;text-align:left;font-weight:800;font-size:18px;box-shadow:0 6px 16px var(--shadow)}
+.cta .ci{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:20px;background:rgba(255,255,255,.22)}
+.cta .ct{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.cta small{font-size:13.5px;font-weight:700;opacity:.8}
+.cta .arr{flex:none;opacity:.7}
+.cta.go{background:var(--yellow);color:var(--yellow-ink)}
+.cta.go .ci{background:rgba(0,0,0,.08)}
+.cta.done{background:var(--accent);color:var(--accent-ink)}
+.cta.back{background:var(--surface);color:var(--accent);box-shadow:none;border:1.5px solid var(--line);min-height:56px;font-size:16.5px}
+.cta.back .ci{background:var(--accent-soft);font-size:18px}
+.links{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.linkbtn{border:0;background:transparent;color:var(--muted);font-weight:700;font-size:14.5px;padding:10px 12px;min-height:44px;border-radius:12px}
+.linkbtn.red{color:var(--over)}
+.leftnote{margin:0;text-align:center;font-size:13.5px;color:var(--muted);font-weight:600}
+.confirm{margin-top:14px;background:var(--surface);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 12px 28px var(--shadow);border:1.5px solid var(--line)}
+.confirm h3{margin:0;font-size:20px;font-weight:800}
+.confirm p{margin:0;font-size:14.5px;color:var(--muted);font-weight:600}
+.sum{display:flex;flex-direction:column;background:var(--bg);border-radius:14px;padding:4px 14px}
+.sum div{display:flex;justify-content:space-between;gap:10px;padding:9px 0;font-weight:700;font-size:15px}
+.sum div+div{border-top:1px solid var(--line)}
+.sum b{font-variant-numeric:tabular-nums}
+.confirm .row{display:flex;flex-direction:column;gap:8px}
+.confirm .row .btn{width:100%;min-height:50px;font-size:16px}
+.btn.solid-red{background:var(--over);color:#fff}
 .card{background:var(--surface);border-radius:20px;padding:16px;margin-top:14px}
 .card h3{font-weight:800;font-size:19px;margin:0}
 .card p{margin:4px 0 10px;color:var(--muted);font-size:14px;font-weight:600}
@@ -262,8 +289,9 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
   <div class="bandin">
     <div class="toprow">
       <button class="store" id="storeBtn" aria-label="Change store"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD25A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg><span id="storeName">Choose your Aldi</span><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
-      <button class="shopbtn" id="shopBtn"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.3"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span id="shopBtnLabel">Shop</span></button>
+      <button class="shopbtn" id="shopBtn"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.3"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span id="shopBtnLabel">Shop Mode</span></button>
     </div>
+    <span class="modetag" aria-live="polite">🛒 Shop Mode on</span>
     <h1>Grocery List</h1>
     <div class="subline"><span id="toGet">Nothing on the list yet</span><span class="sync" id="sync" data-state="local">This phone only</span></div>
   </div>
@@ -290,7 +318,7 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
     </form>
   </section>
   <div class="shopbar" id="shopBar" hidden>
-    <div class="sbtop"><span id="shopProg">0 of 0 in the trolley</span><button class="btn ghost small" id="exitShop" hidden>Done</button></div>
+    <div class="sbtop"><span id="shopProg">0 of 0 in the trolley</span><button class="btn ghost small" id="exitShop">← Back to list</button></div>
     <div class="sprog"><i id="shopProgBar"></i></div>
     <p class="shophint">Tap an item as it goes in your trolley. Press and hold to change its price.</p>
   </div>
@@ -695,7 +723,7 @@ function render(){
   $("#planMark").style.left=`calc(${pc}% - 1px)`; $("#planMark").hidden=!plan||!shopMode;
   $("#trolleyDot").hidden=!shopMode;
   $("#trolleyDot").style.left=`clamp(14px, ${cc}%, calc(100% - 14px))`;
-  $("#shopBtnLabel").textContent=shopMode?"Done":"Shop";
+  $("#shopBtnLabel").textContent=shopMode?"Exit Shop Mode":"Shop Mode"; $("#shopBtn").classList.toggle("on",shopMode); $("#shopBtn").setAttribute("aria-label",shopMode?"Exit Shop Mode and go back to your list":"Start Shop Mode");
   renderHousehold();
 
   const area=$("#listArea"); area.innerHTML="";
@@ -733,16 +761,21 @@ function render(){
   }
 
   const acts=$("#listActions"); acts.innerHTML="";
-  if(nAll){
-    const fin=document.createElement("button"); fin.className=shopMode?"btn":"btn ghost"; fin.textContent="Finish shop";
-    fin.onclick=()=>showConfirm("finish");
+  if(nAll && !$("#confirmArea").innerHTML){
+    const cta=(cls,icon,title,sub,fn)=>{const b=document.createElement("button");b.className="cta "+cls;
+      b.innerHTML=`<span class="ci" aria-hidden="true">${icon}</span><span class="ct"><span>${title}</span>${sub?`<small>${sub}</small>`:""}</span><svg class="arr" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+      b.onclick=fn; return b;};
+    const link=(cls,txt,fn)=>{const b=document.createElement("button");b.className="linkbtn "+cls;b.textContent=txt;b.onclick=fn;return b;};
     if(!shopMode){
-      const go=document.createElement("button"); go.className="btn yellow"; go.textContent="Start shopping";
-      go.onclick=()=>setShop(true);
-      const clr=document.createElement("button"); clr.className="btn ghost"; clr.textContent="Clear list";
-      clr.onclick=()=>showConfirm("clear");
-      acts.append(go,fin,clr);
-    } else acts.append(fin);
+      acts.append(cta("go","🛒","Start Shop Mode",`${nAll} item${nAll===1?"":"s"} · ${gbp(plan)}`,()=>setShop(true)));
+      const l=document.createElement("div"); l.className="links";
+      l.append(link("","Finish shop",()=>showConfirm("finish")),link("red","Clear list",()=>showConfirm("clear")));
+      acts.append(l);
+    } else {
+      acts.append(cta("done","✓","Finish shop",`${gbp(cart)} in your trolley · ${nIn} of ${nAll} item${nAll===1?"":"s"}`,()=>showConfirm("finish")));
+      if(togo){const n=document.createElement("p");n.className="leftnote";n.textContent=`${togo} item${togo===1?"":"s"} not ticked will stay on your next list.`;acts.append(n);}
+      const b=cta("back","←","Back to List Mode","Keep shopping later, nothing is lost",()=>setShop(false)); b.querySelector(".arr").remove(); acts.append(b);
+    }
   }
   renderAisles();
   renderStaples();
@@ -860,11 +893,18 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;","
 
 function showConfirm(kind){
   const c=$("#confirmArea"); const {plan,cart}=totals();
-  const msg= kind==="finish"
-    ? `Log this shop at <b class="mono">${gbp(cart||plan)}</b> and start a new list? Items you didn't tick stay on${(S.saved||[]).some(L=>L.auto)?", and "+S.saved.filter(L=>L.auto).map(L=>esc(L.name)).join(" and ")+" will be added again":""}.`
-    : "Remove everything from this week's list? Saved lists aren't affected.";
-  c.innerHTML=`<div class="confirm"><div>${msg}</div><div class="row"><button class="btn small" id="cYes">${kind==="finish"?"Finish and start new list":"Clear list"}</button><button class="btn ghost small" id="cNo">Cancel</button></div></div>`;
-  $("#cNo").onclick=()=>c.innerHTML="";
+  const nIn=S.list.filter(x=>x.inTrolley).length, left=S.list.length-nIn;
+  const autos=(S.saved||[]).filter(L=>L.auto).map(L=>esc(L.name));
+  const html= kind==="finish"
+    ? `<h3>Finish this shop?</h3>
+       <div class="sum"><div><span>Spent</span><b>${gbp(cart||plan)}</b></div><div><span>In the trolley</span><b>${nIn} item${nIn===1?"":"s"}</b></div>${left?`<div><span>Moving to next list</span><b>${left} item${left===1?"":"s"}</b></div>`:""}${autos.length?`<div><span>Added again</span><b>${autos.join(", ")}</b></div>`:""}</div>
+       <p>We'll save this shop to your history and start a fresh list.</p>
+       <div class="row"><button class="btn" id="cYes">Finish and start new list</button><button class="btn ghost" id="cNo">Not yet</button></div>`
+    : `<h3>Clear this week's list?</h3><p>Everything on this week's list will be removed. Your saved lists aren't affected.</p>
+       <div class="row"><button class="btn solid-red" id="cYes">Clear list</button><button class="btn ghost" id="cNo">Cancel</button></div>`;
+  c.innerHTML=`<div class="confirm" role="dialog" aria-label="${kind==="finish"?"Finish this shop":"Clear list"}">${html}</div>`;
+  render(); c.scrollIntoView({behavior:"smooth",block:"center"});
+  $("#cNo").onclick=()=>{c.innerHTML="";render();};
   $("#cYes").onclick=()=>{
     if(kind==="finish"){
       const spent=cart||plan; const wasExample=S.example;
