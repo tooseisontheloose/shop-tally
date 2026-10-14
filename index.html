@@ -482,11 +482,16 @@ function fromDoc(d){const base=exampleState();
   const list=Object.entries(d.items||{}).map(([key,v])=>({key,ref:v.ref||undefined,cref:v.cref||undefined,sku:v.sku||undefined,snap:v.snap||undefined,qty:v.qty||1,inTrolley:!!v.inTrolley,o:v.o||0})).sort((x,y)=>x.o-y.o);
   return Object.assign(base,{list,myPrices:d.myPrices||{},custom:d.custom||{},itemAisle:d.itemAisle||{},budget:d.budget||base.budget,saved:d.saved||[],history:d.history||[],aisles:d.aisles||[],store:d.store||"",storeSet:!!d.storeSet,bringAdded:!!d.bringAdded})}
 let remote=null, lastDoc=null, unsub=null, pendingRender=false, household=lsGet(LS_HH);
+// While a change made on this phone is waiting to be sent, ignore incoming copies of the list,
+// otherwise an older copy can arrive in that gap and undo the change (a delete "not deleting").
+let localDirty=false;
+const deep=o=>JSON.parse(JSON.stringify(o));
 function persist(){
   lsSet(LS_KEY,JSON.stringify(S));
-  if(remote&&lastDoc){clearTimeout(saveTimer);saveTimer=setTimeout(pushRemote,200)}
+  if(remote&&lastDoc){localDirty=true;clearTimeout(saveTimer);saveTimer=setTimeout(pushRemote,150)}
 }
 function pushRemote(){
+  localDirty=false;
   const cur=toDoc(S), prev=lastDoc||{}, patch={};
   for(const k of Object.keys(cur)){
     if(MAPS.includes(k)){const x=cur[k]||{},y=prev[k]||{};
@@ -495,7 +500,7 @@ function pushRemote(){
     } else if(JSON.stringify(cur[k])!==JSON.stringify(prev[k])) patch[k]=cur[k];
   }
   if(!Object.keys(patch).length) return;
-  lastDoc=cur;
+  lastDoc=deep(cur);
   remote.update(patch).catch(()=>setSync("error"));
 }
 function setSync(st){const el=$("#sync");el.dataset.state=st;
@@ -519,14 +524,14 @@ async function connectRemote(){
     let checkedNew=false;
     unsub=fs.onSnapshot(ref,{includeMetadataChanges:true},async snap=>{
       if(!snap.exists()){
-        if(!checkedNew&&!snap.metadata.fromCache){checkedNew=true;const d=toDoc(S);try{await fs.setDoc(ref,d);lastDoc=d}catch(e){setSync("error")}}
+        if(!checkedNew&&!snap.metadata.fromCache){checkedNew=true;const d=deep(toDoc(S));try{await fs.setDoc(ref,d);lastDoc=deep(d)}catch(e){setSync("error")}}
         return;
       }
       checkedNew=true;
       const d=snap.data();
       setSync(snap.metadata.fromCache?"offline":"synced");
-      if(snap.metadata.hasPendingWrites) return;
-      lastDoc=d; S=fromDoc(d);
+      if(snap.metadata.hasPendingWrites||localDirty) return;
+      lastDoc=deep(d); S=fromDoc(deep(d));
       if(!S.bringAdded){addBring(S);lsSet(LS_KEY,JSON.stringify(S));pushRemote()}
       lsSet(LS_KEY,JSON.stringify(S));
       if(isTyping()) pendingRender=true; else render();
@@ -1014,7 +1019,7 @@ function savedEditor(L,idx){
     r.querySelector(".sx").onclick=()=>{L.items.splice(i,1);persist();render();toast("Removed "+f.name)};
     rows.appendChild(r);});
   const nm=c.querySelector("#se-name");
-  nm.onchange=()=>{const v=nm.value.trim();if(v){L.name=v;persist();render()}};
+  nm.oninput=()=>{const v=nm.value.trim();if(v){L.name=v;persist()}};
   const sb=c.querySelector("#se-search"), res=c.querySelector("#se-results");
   let seShown=10;
   sb.oninput=()=>{seShown=10;drawSe()};
