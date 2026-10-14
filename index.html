@@ -55,9 +55,6 @@ button{cursor:pointer}
 .store svg{flex:none}
 .shopbtn{border:0;background:var(--yellow);color:var(--yellow-ink);font-weight:800;font-size:15px;height:36px;padding:0 14px;border-radius:999px;display:flex;align-items:center;gap:6px;flex:none;white-space:nowrap}
 .shopbtn.on{background:var(--band-chip);color:var(--band-ink);box-shadow:inset 0 0 0 1.5px var(--band-sub)}
-.modetag{display:none;align-self:flex-start;margin-top:10px;background:var(--yellow);color:var(--yellow-ink);font-weight:800;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
-body.shop .modetag{display:inline-flex;align-items:center;gap:6px}
-body.shop .band h1{margin-top:6px}
 .band h1{margin:12px 0 0;font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
 .subline{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:var(--band-sub);font-size:15px;font-weight:600}
 .sync{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--band-chip);color:var(--band-ink);white-space:nowrap}
@@ -291,7 +288,6 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
       <button class="store" id="storeBtn" aria-label="Change store"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD25A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg><span id="storeName">Choose your Aldi</span><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="shopbtn" id="shopBtn"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.3"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span id="shopBtnLabel">Shop Mode</span></button>
     </div>
-    <span class="modetag" aria-live="polite">🛒 Shop Mode on</span>
     <h1>Grocery List</h1>
     <div class="subline"><span id="toGet">Nothing on the list yet</span><span class="sync" id="sync" data-state="local">This phone only</span></div>
   </div>
@@ -317,11 +313,6 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
       <button class="btn" type="submit">Save</button>
     </form>
   </section>
-  <div class="shopbar" id="shopBar" hidden>
-    <div class="sbtop"><span id="shopProg">0 of 0 in the trolley</span><button class="btn ghost small" id="exitShop">← Back to list</button></div>
-    <div class="sprog"><i id="shopProgBar"></i></div>
-    <p class="shophint">Tap an item as it goes in your trolley. Press and hold to change its price.</p>
-  </div>
 
   <section id="tab-list">
     <div class="add">
@@ -723,13 +714,11 @@ function render(){
   $("#planMark").style.left=`calc(${pc}% - 1px)`; $("#planMark").hidden=!plan||!shopMode;
   $("#trolleyDot").hidden=!shopMode;
   $("#trolleyDot").style.left=`clamp(14px, ${cc}%, calc(100% - 14px))`;
-  $("#shopBtnLabel").textContent=shopMode?"Exit Shop Mode":"Shop Mode"; $("#shopBtn").classList.toggle("on",shopMode); $("#shopBtn").setAttribute("aria-label",shopMode?"Exit Shop Mode and go back to your list":"Start Shop Mode");
+  $("#shopBtnLabel").textContent=shopMode?"Back to List":"Shop Mode"; $("#shopBtn svg").innerHTML=shopMode?'<path d="M15 5l-7 7 7 7"/>':'<path d="M3 4h2l2.4 11h10.2L20 7H6.3"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>'; $("#shopBtn").classList.toggle("on",shopMode); $("#shopBtn").setAttribute("aria-label",shopMode?"Back to List, leaves Shop Mode":"Start Shop Mode");
   renderHousehold();
 
   const area=$("#listArea"); area.innerHTML="";
   document.body.classList.toggle("shop",shopMode);
-  $("#shopBar").hidden=!shopMode;
-  if(shopMode){$("#shopProg").textContent=`${nIn} of ${nAll} in the trolley`;$("#shopProgBar").style.width=(nAll?nIn/nAll*100:0)+"%";}
   if(!nAll) area.innerHTML='<div class="empty"><b>Your list is empty</b>Search above to add things from Aldi, or add your Weekly staples from Saved.</div>';
   else if(!togo) area.innerHTML='<div class="empty"><b>Everything is in the trolley</b>Tap Finish shop to log what you spent.</div>';
 
@@ -1138,7 +1127,6 @@ $("#newListForm").addEventListener("submit",e=>{e.preventDefault();
 // ---------- tabs / toast ----------
 function switchTab(t){for(const n of ["list","staples","about"]){$("#tab-"+n).hidden=n!==t;$("#t-"+n).setAttribute("aria-selected",n===t)}window.scrollTo(0,0)}
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
-$("#exitShop").onclick=()=>setShop(false);
 const appLink=()=>location.origin+location.pathname;
 $("#appLink").textContent=appLink();
 async function copyApp(){try{await navigator.clipboard.writeText(appLink());toast("Link copied")}catch(e){const r=document.createRange();r.selectNodeContents($("#appLink"));const sl=getSelection();sl.removeAllRanges();sl.addRange(r);toast("Link selected, copy it from here")}}
