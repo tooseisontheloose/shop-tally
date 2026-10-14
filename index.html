@@ -238,7 +238,7 @@ nav.tabs button[aria-selected="true"]{color:var(--accent);border-top-color:var(-
     <p class="note">Put these in the order you walk round your Aldi. Your list and shop mode follow this order.</p>
     <div class="card aisles" id="aisleArea"></div>
     <h2 class="sect">Where prices come from</h2>
-    <p class="note">Prices without a tag come from Aldi UK's online catalogue, which lists the in-store price of each product. They're checked automatically every Monday and were last updated on <b id="checkedDate"></b>. If the shelf says something different, tap the item and type the shelf price. Your price is used until Aldi's next update.</p>
+    <p class="note">Prices without a tag come from Aldi UK's online catalogue, which lists the in-store price of each product. They're checked automatically every Friday morning and were last updated on <b id="checkedDate"></b>. If the shelf says something different, tap the item and type the shelf price. Your price is used until the next Friday check.</p>
     <p class="note">Items you add yourself show a <span class="tag own">your price</span> tag. The app remembers your price for that item next time.</p>
       </section>
 </div>
@@ -362,10 +362,10 @@ const LS_KEY="wst-state", LS_HH="wst-household";
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}}
 const MAPS=["items","myPrices","custom","itemAisle"];
-function toDoc(st){const items={};st.list.forEach((it,i)=>{items[it.key]={ref:it.ref||null,cref:it.cref||null,qty:it.qty,inTrolley:!!it.inTrolley,o:i}});
+function toDoc(st){const items={};st.list.forEach((it,i)=>{items[it.key]={ref:it.ref||null,cref:it.cref||null,sku:it.sku||null,snap:it.snap||null,qty:it.qty,inTrolley:!!it.inTrolley,o:i}});
   return {items,myPrices:st.myPrices||{},custom:st.custom||{},itemAisle:st.itemAisle||{},budget:st.budget,saved:st.saved||[],history:st.history||[],aisles:st.aisles||[],bringAdded:!!st.bringAdded}}
 function fromDoc(d){const base=exampleState();
-  const list=Object.entries(d.items||{}).map(([key,v])=>({key,ref:v.ref||undefined,cref:v.cref||undefined,qty:v.qty||1,inTrolley:!!v.inTrolley,o:v.o||0})).sort((x,y)=>x.o-y.o);
+  const list=Object.entries(d.items||{}).map(([key,v])=>({key,ref:v.ref||undefined,cref:v.cref||undefined,sku:v.sku||undefined,snap:v.snap||undefined,qty:v.qty||1,inTrolley:!!v.inTrolley,o:v.o||0})).sort((x,y)=>x.o-y.o);
   return Object.assign(base,{list,myPrices:d.myPrices||{},custom:d.custom||{},itemAisle:d.itemAisle||{},budget:d.budget||base.budget,saved:d.saved||[],history:d.history||[],aisles:d.aisles||[],bringAdded:!!d.bringAdded})}
 let remote=null, lastDoc=null, unsub=null, pendingRender=false, household=lsGet(LS_HH);
 function persist(){
@@ -426,6 +426,7 @@ function setHousehold(code){household=code;lsSet(LS_HH,code);connectRemote();ren
 (function readJoinLink(){const m=location.hash.match(/join=([a-z0-9-]{20,})/i);if(m){history.replaceState(null,"",location.pathname);household=m[1].toLowerCase();lsSet(LS_HH,household);setTimeout(()=>toast("Joined your household list"),300)}})();
 connectRemote();
 loadLive();
+loadRange();
 
 function renderHousehold(){
   const box=$("#hhArea"); if(!box) return;
@@ -453,7 +454,25 @@ async function copyLink(){try{await navigator.clipboard.writeText(joinLink());to
 // Live Aldi prices from prices.json (refreshed weekly). A price you typed wins until Aldi's price is newer.
 let LIVE={updatedMs:0,items:{}};
 function ownOf(v){if(v==null)return null;return typeof v==="object"?{p:v.p,t:v.t||0}:{p:v,t:0}}
+// Full Aldi range from catalogue.json (refreshed every Friday)
+let RANGE=[], RANGE_BY={};
+const CAT_AISLE={"Fresh Food":"Fruits & Vegetables","Bakery":"Bread & Pastries","Frozen Food":"Frozen & Convenience","Drinks":"Juice & Drinks","Food Cupboard":"Tins & Jars","Chilled Food":"Milk & Cheese","Household":"Household","Health & Beauty":"Baby & Care","Baby & Toddler":"Baby & Care","Pet Care":"Household","Alcohol":"Juice & Drinks","Beers & Ciders":"Juice & Drinks","Wine":"Juice & Drinks","Spirits":"Juice & Drinks"};
+const SUB_AISLE={"Fruit":"Fruits & Vegetables","Vegetables":"Fruits & Vegetables","Salad":"Fruits & Vegetables","Meat":"Meat & Fish","Fish":"Meat & Fish","Poultry":"Meat & Fish","Milk":"Milk & Cheese","Cheese":"Milk & Cheese","Yogurts":"Yoghurts & Desserts","Chilled Desserts":"Yoghurts & Desserts","Biscuits & Crackers":"Snacks & Sweets","Chocolate & Sweets":"Snacks & Sweets","Crisps & Snacks":"Crisps & Nuts","Cereals & Snack Bars":"Cereals","Pasta, Rice & Grains":"Pasta & Rice","Tea & Coffee":"Tea & Coffee","Eggs":"Eggs"};
+function niceName(n){return n.replace(/\s*<?\d+(\.\d+)?%\s*Fat\b/ig,"").replace(/\s{2,}/g," ").trim()}
+function niceSize(name,z){const m=/milk/i.test(name)&&!/chocolate|biscuit|evaporated|condensed|powder/i.test(name)&&/^([\d.]+)\s*l$/i.exec(z||"");
+  if(!m) return z||""; const pt=Math.round(parseFloat(m[1])*1.7598*4)/4; return (pt%1===0?pt:pt.toFixed(2).replace(/0$/,""))+" pints"}
+function rangeAisle(name,c,d){const a=aisleFor(name);if(a!=="Other")return a;return SUB_AISLE[d]||CAT_AISLE[c]||"Other"}
+function titleCase(b){return (b||"").toLowerCase().replace(/\b\w/g,x=>x.toUpperCase())}
+function fromRange(r){return {name:niceName(r.n),brand:titleCase(r.b),size:niceSize(r.n,r.z),price:r.p,c:r.c,d:r.d}}
+async function loadRange(){
+  try{const r=await fetch("catalogue.json",{cache:"no-cache"});if(!r.ok)return;const j=await r.json();
+    RANGE=(j.products||[]).map(x=>({...x,h:norm(niceName(x.n)+" "+x.b+" "+x.z),nn:norm(niceName(x.n)).replace(/\s+/g," ").trim()}));RANGE_BY={};for(const x of RANGE)RANGE_BY[x.s]=x;render();}catch(e){}
+}
 function info(it){
+  if(it.sku){const r=RANGE_BY[it.sku], base=r?fromRange(r):(it.snap||{name:"Item",brand:"",size:"",price:0}), own=ownOf(S.myPrices["s"+it.sku]);
+    const m0=(S.itemAisle||{})["s"+it.sku], moved=AISLES.includes(m0)?m0:null;
+    const useOwn=own&&(!r||own.t>LIVE.updatedMs);
+    return {name:base.name,brand:base.brand,size:base.size,price:useOwn?own.p:base.price,own:!!useOwn,aisle:moved||rangeAisle(base.name,base.c,base.d)}}
   const k=it.ref||it.cref, m0=(S.itemAisle||{})[k], moved=AISLES.includes(m0)?m0:null, live=LIVE.items[k];
   if(it.ref){const c=CAT_BY_ID[it.ref]; if(!c) return {name:"Item",brand:"",size:"",price:0,aisle:"Other",own:false};
     const base=live&&typeof live.price==="number"?live.price:c.price, own=ownOf(S.myPrices[it.ref]);
@@ -472,7 +491,7 @@ async function loadLive(){
 }
 function totals(){let plan=0,cart=0,needs=0;for(const it of S.list){const f=info(it);if(f.needs)needs++;const p=f.price*it.qty;plan+=p;if(it.inTrolley)cart+=p}return{plan,cart,needs}}
 function addItem(item){
-  const same=S.list.find(x=>(item.ref&&x.ref===item.ref)||(item.cref&&x.cref===item.cref));
+  const same=S.list.find(x=>(item.ref&&x.ref===item.ref)||(item.cref&&x.cref===item.cref)||(item.sku&&x.sku===item.sku));
   if(same){same.qty+=item.qty||1}else S.list.push({key:uid(),qty:item.qty||1,inTrolley:false,...item});
 }
 function dropExample(){if(S.example){S.list=[];S.example=false}}
@@ -529,15 +548,15 @@ function render(){
       row.querySelector(".name").onclick=()=>{editingKey=editingKey===it.key?null:it.key;render();const i=document.getElementById("price-"+it.key);if(i)i.focus()};
       if(editingKey===it.key){
         const ed=document.createElement("div"); ed.className="editrow";
-        ed.innerHTML=`<label for="price-${it.key}" style="font-size:13px;color:var(--muted)">Shelf price £</label><input class="field mono" id="price-${it.key}" inputmode="decimal" placeholder="e.g. 1.49" value="${f.needs?"":(f.price/100).toFixed(2)}"><button class="btn small">Save</button>${f.own&&it.ref?'<button class="btn ghost small reset">Use Aldi price</button>':''}<button class="btn ghost small del">Remove</button>
+        ed.innerHTML=`<label for="price-${it.key}" style="font-size:13px;color:var(--muted)">Shelf price £</label><input class="field mono" id="price-${it.key}" inputmode="decimal" placeholder="e.g. 1.49" value="${f.needs?"":(f.price/100).toFixed(2)}"><button class="btn small">Save</button>${f.own&&(it.ref||it.sku)?'<button class="btn ghost small reset">Use Aldi price</button>':''}<button class="btn ghost small del">Remove</button>
           <label for="aisle-${it.key}" style="font-size:13px;color:var(--muted)">Aisle</label><select class="field" id="aisle-${it.key}" style="width:auto;padding:8px 10px">${AISLES.map(a=>`<option${a===f.aisle?" selected":""}>${a}</option>`).join("")}</select>`;
-        ed.querySelector("select").onchange=e=>{S.itemAisle=S.itemAisle||{};S.itemAisle[it.ref||it.cref]=e.target.value;editingKey=null;persist();render();toast("Moved to "+e.target.value)};
+        ed.querySelector("select").onchange=e=>{S.itemAisle=S.itemAisle||{};S.itemAisle[it.sku?"s"+it.sku:(it.ref||it.cref)]=e.target.value;editingKey=null;persist();render();toast("Moved to "+e.target.value)};
         const inp=ed.querySelector("input");
         const save=()=>{const p=parsePounds(inp.value);if(p==null){toast("Enter a price like 1.49");return}
-          if(it.ref)S.myPrices[it.ref]={p,t:Date.now()};else{S.custom[it.cref].price=p;S.custom[it.cref].t=Date.now()} editingKey=null;persist();render();toast("Price updated")};
+          if(it.sku)S.myPrices["s"+it.sku]={p,t:Date.now()};else if(it.ref)S.myPrices[it.ref]={p,t:Date.now()};else{S.custom[it.cref].price=p;S.custom[it.cref].t=Date.now()} editingKey=null;persist();render();toast("Price updated")};
         ed.querySelector(".btn:not(.ghost)").onclick=save;
         inp.onkeydown=e=>{if(e.key==="Enter")save()};
-        const r=ed.querySelector(".reset"); if(r) r.onclick=()=>{delete S.myPrices[it.ref];editingKey=null;persist();render()};
+        const r=ed.querySelector(".reset"); if(r) r.onclick=()=>{delete S.myPrices[it.sku?"s"+it.sku:it.ref];editingKey=null;persist();render()};
         ed.querySelector(".del").onclick=()=>{S.list=S.list.filter(x=>x!==it);editingKey=null;persist();render()};
         row.appendChild(ed);
       }
@@ -637,7 +656,9 @@ search.addEventListener("input",()=>{
   const q=norm(search.value).trim();
   if(!q){results.hidden=true;return}
   const words=q.split(/\s+/);
-  const hits=CAT.filter(c=>{const h=norm(c.name+" "+c.brand+" "+c.size);return words.every(w=>h.includes(w))}).slice(0,8);
+  const score=x=>{let sc=0;for(const w of words){const i=x.h.indexOf(w);if(i<0)return -1;sc+=(i===0||x.h[i-1]===" "?2:1);if(x.nn.endsWith(w)||x.nn.endsWith(w+"s"))sc+=4;if(x.nn===w)sc+=4}return sc};
+  const rhits=RANGE.length?RANGE.map(x=>[x,score(x)]).filter(([,sc])=>sc>=0).sort((a,b)=>b[1]-a[1]||a[0].n.length-b[0].n.length).slice(0,12).map(([x])=>x):[];
+  const hits=RANGE.length?[]:CAT.filter(c=>{const h=norm(c.name+" "+c.brand+" "+c.size);return words.every(w=>h.includes(w))}).slice(0,8);
   const customs=Object.entries(S.custom).filter(([k,c])=>words.every(w=>norm(c.name).includes(w))).slice(0,4);
   results.innerHTML="";
   for(const c of hits){ const own=info({ref:c.id}).price;
@@ -645,6 +666,13 @@ search.addEventListener("input",()=>{
     b.innerHTML=`<span class="n"></span><span class="p">${gbp(own!=null?own:c.price)}</span>`;
     b.querySelector(".n").innerHTML=esc(c.name)+`<span>${esc([c.brand,c.size].filter(Boolean).join(" · "))}</span>`;
     b.onclick=()=>{dropExample();addItem({ref:c.id});done(c.name)};
+    results.appendChild(b);
+  }
+  for(const x of rhits){ const f=info({sku:x.s});
+    const b=document.createElement("button"); b.className="res";
+    b.innerHTML=`<span class="n"></span><span class="p">${gbp(f.price)}</span>`;
+    b.querySelector(".n").innerHTML=esc(f.name)+`<span>${esc([f.brand,f.size].filter(Boolean).join(" · "))}</span>`;
+    b.onclick=()=>{const r=fromRange(x);dropExample();addItem({sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d}});done(f.name)};
     results.appendChild(b);
   }
   for(const [k,c] of customs){
@@ -695,8 +723,8 @@ function renderStaples(){
     c.querySelector("h3").textContent=L.name;
     const ch=c.querySelector(".chips");
     for(const it of L.items){const s=document.createElement("span");s.className="chip";s.textContent=(it.qty>1?it.qty+"× ":"")+info(it).name;ch.appendChild(s)}
-    c.querySelector(".add").onclick=()=>{dropExample();for(const it of L.items)addItem({ref:it.ref,cref:it.cref,qty:it.qty});persist();render();switchTab("list");toast("Added "+L.name)};
-    c.querySelector(".upd").onclick=()=>{if(!S.list.length){toast("This week's list is empty");return}L.items=S.list.map(x=>({ref:x.ref,cref:x.cref,qty:x.qty}));persist();render();toast("Updated "+L.name)};
+    c.querySelector(".add").onclick=()=>{dropExample();for(const it of L.items)addItem({ref:it.ref||undefined,cref:it.cref||undefined,sku:it.sku||undefined,snap:it.snap||undefined,qty:it.qty});persist();render();switchTab("list");toast("Added "+L.name)};
+    c.querySelector(".upd").onclick=()=>{if(!S.list.length){toast("This week's list is empty");return}L.items=S.list.map(x=>({ref:x.ref||null,cref:x.cref||null,sku:x.sku||null,snap:x.snap||null,qty:x.qty}));persist();render();toast("Updated "+L.name)};
     const del=c.querySelector(".del");
     del.onclick=()=>{if(del.dataset.sure){S.saved.splice(idx,1);persist();render()}else{del.dataset.sure="1";del.textContent="Tap again to delete"}};
     a.appendChild(c);
@@ -708,7 +736,7 @@ function renderStaples(){
 $("#newListForm").addEventListener("submit",e=>{e.preventDefault();
   const name=$("#newListName").value.trim()||"Weekly staples";
   if(!S.list.length){toast("Add items to this week's list first");return}
-  S.saved.push({name,items:S.list.map(x=>({ref:x.ref,cref:x.cref,qty:x.qty}))});
+  S.saved.push({name,items:S.list.map(x=>({ref:x.ref||null,cref:x.cref||null,sku:x.sku||null,snap:x.snap||null,qty:x.qty}))});
   $("#newListName").value="";persist();render();toast("Saved "+name)});
 
 // ---------- tabs / toast ----------
