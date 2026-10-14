@@ -193,6 +193,10 @@ body.shop .wrap{padding-block-end:40px}
 .card p{margin:4px 0 10px;color:var(--muted);font-size:14px;font-weight:600}
 .card .row{display:flex;gap:8px;flex-wrap:wrap}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:var(--bg);border-radius:16px;padding:4px}
+.seg button{border:0;background:none;border-radius:12px;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:800;font-size:14px;color:var(--muted)}
+.seg button svg{width:24px;height:24px}
+.seg button[aria-checked="true"]{background:var(--surface);color:var(--accent);box-shadow:0 2px 8px var(--shadow)}
 .autorow{display:flex;gap:12px;align-items:center;background:var(--accent-soft);border-radius:14px;padding:12px 14px;margin:0 0 12px;cursor:pointer}
 .autorow input{appearance:none;width:50px;height:30px;border-radius:999px;background:var(--line);position:relative;flex:none;margin:0;cursor:pointer}
 .autorow input::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,.25)}
@@ -294,6 +298,15 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
   <section id="tab-about" class="page-top" hidden>
     <h2 class="sect">Household list</h2>
     <div class="card" id="hhArea"></div>
+    <h2 class="sect">Appearance</h2>
+    <div class="card">
+      <div class="seg" role="radiogroup" aria-label="Theme">
+        <button role="radio" data-theme-opt="auto" aria-checked="true"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 4v16" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>Automatic</button>
+        <button role="radio" data-theme-opt="light" aria-checked="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Light</button>
+        <button role="radio" data-theme-opt="dark" aria-checked="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Dark</button>
+      </div>
+      <p style="margin:10px 0 0">Automatic follows your phone's own light or dark setting. This is saved on this phone only.</p>
+    </div>
     <h2 class="sect">Aisle order</h2>
     <p class="note">Put these in the order you walk round your Aldi. Your list and shop mode follow this order.</p>
     <div class="card aisles" id="aisleArea"></div>
@@ -310,6 +323,11 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
 </div></nav>
 <div class="toast" id="toast" hidden></div>
 
+<script>
+// Theme: applied before the page draws so there's no flash
+(function(){var t=null;try{t=localStorage.getItem("wst-theme")}catch(e){}
+  if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);})();
+</script>
 <script src="config.js"></script>
 <script>
 (function(){
@@ -891,6 +909,15 @@ $("#newListForm").addEventListener("submit",e=>{e.preventDefault();
 function switchTab(t){for(const n of ["list","staples","about"]){$("#tab-"+n).hidden=n!==t;$("#t-"+n).setAttribute("aria-selected",n===t)}window.scrollTo(0,0)}
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 $("#exitShop").onclick=()=>setShop(false);
+function applyTheme(t){
+  if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme");
+  try{if(t==="light"||t==="dark")localStorage.setItem("wst-theme",t);else localStorage.removeItem("wst-theme")}catch(e){}
+  const dark=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
+  const m=document.querySelector('meta[name="theme-color"]'); if(m)m.setAttribute("content",dark?"#123F2E":"#17573F");
+  document.querySelectorAll("[data-theme-opt]").forEach(b=>b.setAttribute("aria-checked",String(b.dataset.themeOpt===(t||"auto"))));
+}
+document.querySelectorAll("[data-theme-opt]").forEach(b=>b.onclick=()=>applyTheme(b.dataset.themeOpt==="auto"?null:b.dataset.themeOpt));
+{let t=null;try{t=localStorage.getItem("wst-theme")}catch(e){}applyTheme(t)}
 $("#shopBtn").onclick=()=>setShop(!shopMode);
 $("#storeBtn").onclick=()=>{const f=$("#storeForm");f.hidden=!f.hidden;$("#budgetForm").hidden=true;if(!f.hidden){$("#storeInput").value=S.store||"Chadderton";$("#storeInput").focus()}};
 $("#storeForm").addEventListener("submit",e=>{e.preventDefault();const v=$("#storeInput").value.trim().replace(/^aldi,?\s*/i,"");if(!v){toast("Type your Aldi's town or area");return}S.store=v;$("#storeForm").hidden=true;persist();render();toast("Store set to Aldi, "+v)});
