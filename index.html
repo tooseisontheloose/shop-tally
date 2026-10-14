@@ -238,7 +238,7 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
 <div class="wrap">
   <section class="budget" aria-label="Budget">
     <div class="brow">
-      <div><span class="lbl">Spent so far</span><span class="spent" id="spent">£0.00</span></div>
+      <div><span class="lbl" id="heroLbl">List total</span><span class="spent" id="spent">£0.00</span></div>
       <button class="leftbtn" id="budgetBtn" aria-label="Change weekly budget"><span class="lbl">Left of <span id="budgetVal">£60</span></span><span class="left" id="leftOf">£60.00</span></button>
     </div>
     <div class="track" aria-hidden="true">
@@ -579,20 +579,24 @@ function render(){
   $("#checkedDate").textContent=LIVE.updatedMs?priceLabel(new Date(LIVE.updatedMs)):CHECKED;
   const {plan,cart,needs}=totals(), b=S.budget;
   $("#storeName").textContent="Aldi, "+(S.store||"Chadderton");
-  $("#spent").textContent=gbp(cart);
+  $("#heroLbl").textContent=shopMode?"In your trolley":"List total";
+  $("#spent").textContent=gbp(shopMode?cart:plan);
   $("#budgetVal").textContent=gbp(b).replace(".00","");
   const left=b-plan, lo=$("#leftOf");
   lo.textContent=left>=0?gbp(left):"−"+gbp(-left); lo.classList.toggle("over",left<0);
   $("#budgetBtn .lbl").firstChild.textContent=left>=0?"Left of ":"Over ";
   const nIn=S.list.filter(x=>x.inTrolley).length, nAll=S.list.length;
-  $("#inTrolley").textContent=nAll?`${nIn} of ${nAll} in the trolley`+(needs?` · ${needs} need a price`:""):"Nothing on the list yet";
-  $("#listTotal").textContent="List total "+gbp(plan);
+  const needTxt=needs?` · ${needs} need${needs===1?"s":""} a price`:"";
+  if(shopMode){$("#inTrolley").textContent=`${nIn} of ${nAll} in the trolley`+needTxt;$("#listTotal").textContent="List total "+gbp(plan)}
+  else{$("#inTrolley").textContent=nAll?`${nAll} item${nAll===1?"":"s"} on your list`+needTxt:"Nothing on the list yet";$("#listTotal").textContent=b?`${Math.round(Math.min(999,plan/b*100))}% of your budget`:""}
   const togo=nAll-nIn;
   $("#toGet").textContent=!nAll?"Nothing on the list yet":togo?`${togo} item${togo===1?"":"s"} still to get`:"Everything's in the trolley";
   const bar=$("#bar"); bar.classList.toggle("over",plan>b); bar.classList.toggle("warn",plan<=b&&plan>b*0.9);
   const pc=Math.min(100,b?plan/b*100:0), cc=Math.min(100,b?cart/b*100:0);
-  $("#barPlan").style.width=pc+"%"; $("#barCart").style.width=cc+"%";
-  $("#planMark").style.left=`calc(${pc}% - 1px)`; $("#planMark").hidden=!plan;
+  // List mode: the bar shows the whole list. Shop mode: it fills with what's in the trolley.
+  $("#barPlan").style.width=pc+"%"; $("#barCart").style.width=(shopMode?cc:pc)+"%";
+  $("#planMark").style.left=`calc(${pc}% - 1px)`; $("#planMark").hidden=!plan||!shopMode;
+  $("#trolleyDot").hidden=!shopMode;
   $("#trolleyDot").style.left=`clamp(14px, ${cc}%, calc(100% - 14px))`;
   $("#shopBtnLabel").textContent=shopMode?"Done":"Shop";
   renderHousehold();
