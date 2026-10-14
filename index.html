@@ -189,6 +189,8 @@ body.shop .rowin{min-height:86px;padding:12px 14px}
 body.shop .ico{width:62px;height:62px}
 body.shop .name b{font-size:19px}
 body.shop .tick{width:46px;height:46px;border-width:3px}
+body.shop .rowin{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body.shop .rowin:active{background:var(--accent-soft)}
 body.shop .wrap{padding-block-end:40px}
 
 /* Other pages */
@@ -665,7 +667,8 @@ const AISLE_LOOK={"Fruits & Vegetables":["🥦","#DDEFD3"],"Crisps & Nuts":["�
  "Bread & Pastries":["🍞","#F3E3CB"],"Tea & Coffee":["☕","#E9DED3"],"Other":["🛒","#E6E2DA"]};
 const look=a=>AISLE_LOOK[a]||AISLE_LOOK.Other;
 const TICK_SVG='<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
-let openKey=null;
+let openKey=null, holdAt=0;
+const justHeld=()=>Date.now()-holdAt<800;
 function render(){
   $("#checkedDate").textContent=LIVE.updatedMs?priceLabel(new Date(LIVE.updatedMs)):CHECKED;
   const {plan,cart,needs}=totals(), b=S.budget;
@@ -758,16 +761,22 @@ function itemRow(it,tint){
   row.querySelector(".name .nsub").innerHTML=f.needs?'Tap to add the shelf price<span class="tag">add price</span>':esc([f.brand,f.size].filter(Boolean).join(" · "))+(f.own?'<span class="tag">your price</span>':'');
   const im=row.querySelector(".ico img"); if(im) im.onerror=()=>{const bx=im.parentNode;bx.classList.remove("photo");bx.innerHTML=iconFor(f)};
   const toggle=()=>{if(openKey){openKey=null;render();return}it.inTrolley=true;haptic();persist();render()};
-  row.querySelector(".tick").onclick=toggle; row.querySelector(".ico").onclick=toggle;
+  row.querySelector(".tick").onclick=()=>{if(!justHeld())toggle()}; row.querySelector(".ico").onclick=()=>{if(!justHeld())toggle()};
   row.querySelector(".under").onclick=()=>{S.list=S.list.filter(x=>x!==it);openKey=null;persist();render();toast("Removed "+f.name)};
-  row.querySelector(".name").onclick=()=>{if(openKey){openKey=null;render();return}editingKey=editingKey===it.key?null:it.key;render();const i=document.getElementById("price-"+it.key);if(i)i.focus()};
-  // swipe left to reveal Delete
-  const rin=row.querySelector(".rowin"); let x0=null,y0=0,dx=0,horiz=null;
-  rin.addEventListener("touchstart",e=>{const t=e.touches[0];x0=t.clientX;y0=t.clientY;dx=0;horiz=null},{passive:true});
+  const openEdit=()=>{editingKey=editingKey===it.key?null:it.key;render();const i=document.getElementById("price-"+it.key);if(i)i.focus()};
+  row.querySelector(".name").onclick=e=>{if(openKey){openKey=null;render();return}if(shopMode){e.stopPropagation();if(!suppressTap&&!justHeld())toggle();return}openEdit()};
+  // swipe left to reveal Delete; in shop mode, tap anywhere to tick and press and hold to edit
+  const rin=row.querySelector(".rowin"); let x0=null,y0=0,dx=0,horiz=null,holdT=null,suppressTap=false;
+  if(shopMode){
+    rin.addEventListener("click",e=>{if(e.target.closest(".tick")||e.target.closest(".ico")||e.target.closest(".name"))return;if(suppressTap||openKey||justHeld())return;toggle()});
+    rin.addEventListener("contextmenu",e=>e.preventDefault());
+  }
+  rin.addEventListener("touchstart",e=>{const t=e.touches[0];x0=t.clientX;y0=t.clientY;dx=0;horiz=null;suppressTap=false;
+    if(shopMode){clearTimeout(holdT);holdT=setTimeout(()=>{if(horiz==null){suppressTap=true;holdAt=Date.now();haptic();openEdit()}},550)}},{passive:true});
   rin.addEventListener("touchmove",e=>{if(x0==null)return;const t=e.touches[0];const mx=t.clientX-x0,my=t.clientY-y0;
-    if(horiz==null&&(Math.abs(mx)>8||Math.abs(my)>8))horiz=Math.abs(mx)>Math.abs(my);
+    if(horiz==null&&(Math.abs(mx)>8||Math.abs(my)>8)){horiz=Math.abs(mx)>Math.abs(my);clearTimeout(holdT);if(horiz)suppressTap=true}
     if(horiz){dx=mx;const base=openKey===it.key?-88:0;rin.style.transition="none";rin.style.transform=`translateX(${Math.max(-110,Math.min(0,base+dx))}px)`}},{passive:true});
-  rin.addEventListener("touchend",()=>{if(x0==null)return;rin.style.transition="";rin.style.transform="";
+  rin.addEventListener("touchend",()=>{clearTimeout(holdT);if(x0==null)return;rin.style.transition="";rin.style.transform="";
     if(horiz){const was=openKey===it.key;if(!was&&dx<-50){openKey=it.key;haptic()}else if(was&&dx>30){openKey=null}render()}x0=null},{passive:true});
   if(editingKey===it.key){
     const ed=document.createElement("div"); ed.className="editrow";
