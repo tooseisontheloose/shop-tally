@@ -559,11 +559,39 @@ function ownOf(v){if(v==null)return null;return typeof v==="object"?{p:v.p,t:v.t
 // Full Aldi range from catalogue.json (refreshed every Friday)
 let RANGE=[], RANGE_BY={};
 const CAT_AISLE={"Fresh Food":"Fruits & Vegetables","Bakery":"Bread & Pastries","Frozen Food":"Frozen & Convenience","Drinks":"Juice & Drinks","Food Cupboard":"Tins & Jars","Chilled Food":"Milk & Cheese","Household":"Household","Health & Beauty":"Baby & Care","Baby & Toddler":"Baby & Care","Pet Care":"Household","Alcohol":"Juice & Drinks","Beers & Ciders":"Juice & Drinks","Wine":"Juice & Drinks","Spirits":"Juice & Drinks"};
-const SUB_AISLE={"Fruit":"Fruits & Vegetables","Vegetables":"Fruits & Vegetables","Salad":"Fruits & Vegetables","Meat":"Meat & Fish","Fish":"Meat & Fish","Poultry":"Meat & Fish","Milk":"Milk & Cheese","Cheese":"Milk & Cheese","Yogurts":"Yoghurts & Desserts","Chilled Desserts":"Yoghurts & Desserts","Biscuits & Crackers":"Snacks & Sweets","Chocolate & Sweets":"Snacks & Sweets","Crisps & Snacks":"Crisps & Nuts","Cereals & Snack Bars":"Cereals","Pasta, Rice & Grains":"Pasta & Rice","Tea & Coffee":"Tea & Coffee","Eggs":"Eggs"};
-function niceName(n){return n.replace(/\s*<?\d+(\.\d+)?%\s*Fat\b/ig,"").replace(/\s{2,}/g," ").trim()}
-function niceSize(name,z){const m=/milk/i.test(name)&&!/milk chocolate|biscuit|evaporated|condensed|powder|coconut/i.test(name)&&/^([\d.]+)\s*l$/i.exec(z||"");
-  if(!m) return z||""; const pt=Math.round(parseFloat(m[1])*1.7598*4)/4; return (pt%1===0?pt:pt.toFixed(2).replace(/0$/,""))+" pints"}
-function rangeAisle(name,c,d){const a=aisleFor(name);if(a!=="Other")return a;return SUB_AISLE[d]||CAT_AISLE[c]||"Other"}
+// Aldi's own sections, mapped onto your walk round the shop. Used first for anything from Aldi's range.
+const SUB_AISLE={
+ "Fruit":"Fruits & Vegetables","Vegetables":"Fruits & Vegetables","Stir Fry Vegetables, Sauce & Noodles":"Fruits & Vegetables",
+ "Bacon & Sausages":"Meat & Fish","Beef":"Meat & Fish","Black Pudding, Haggis & Stuffing":"Meat & Fish","Breaded Fish & Fishcakes":"Meat & Fish","Fish":"Meat & Fish","Lamb":"Meat & Fish","Pork & Gammon":"Meat & Fish","Poultry":"Meat & Fish","Seafood & Prawns":"Meat & Fish",
+ "Chilled Meats":"Meat & Fish","Food To Go":"Meat & Fish","Meat Substitutes":"Meat & Fish","Party Food, Pies & Salads":"Meat & Fish","Pizza, Pasta & Garlic Bread":"Meat & Fish","Ready Meals":"Meat & Fish","Sides & Starters":"Meat & Fish","Soups":"Meat & Fish","Chilled Vegan":"Meat & Fish","Chilled Vegetarian":"Meat & Fish",
+ "Cheese":"Milk & Cheese","Dairy":"Milk & Cheese","Milk":"Milk & Cheese","Eggs":"Eggs",
+ "Yogurts":"Yoghurts & Desserts","Chilled Desserts":"Yoghurts & Desserts",
+ "Crisps & Snacks":"Crisps & Nuts","Seeds, Nuts & Dried Fruits":"Crisps & Nuts",
+ "Tins, Cans & Packets":"Tins & Jars","Sauces, Oils & Dressings":"Tins & Jars","Herbs & Spices":"Tins & Jars","Jams, Spreads & Syrups":"Tins & Jars","Sugar & Home Baking":"Tins & Jars","Desserts":"Tins & Jars",
+ "Rice, Pasta & Noodles":"Pasta & Rice",
+ "Soft Drinks & Juices":"Juice & Drinks","Water":"Juice & Drinks","Tonic & Mixers":"Juice & Drinks","Autumn Drinks":"Juice & Drinks",
+ "Beers & Ciders":"Juice & Drinks","No & Low Alcohol":"Juice & Drinks","Port, Sherry & Fortified Wine":"Juice & Drinks","Prosecco, Champagne & Sparkling Wine":"Juice & Drinks","Red Wine":"Juice & Drinks","Rosé Wine":"Juice & Drinks","Spirits & Liqueurs":"Juice & Drinks","White Wine":"Juice & Drinks",
+ "Baby Food Pouches & Pots":"Baby & Care","Baby Formula":"Baby & Care","Baby Snacks & Finger Food":"Baby & Care","Nappies":"Baby & Care","Wipes, Creams & Nappy Sacks":"Baby & Care",
+ "Bath, Shower & Soap":"Baby & Care","Bladder Weakness":"Baby & Care","Cotton Wool & Buds":"Baby & Care","Dental Care":"Baby & Care","Deodorants":"Baby & Care","Medicine":"Baby & Care","Period Products":"Baby & Care","Shampoo & Hair care":"Baby & Care","Shaving & Hair Removal":"Baby & Care","Skin Care":"Baby & Care","Vitamins & Supplements":"Baby & Care",
+ "Air Fresheners":"Household","Batteries":"Household","Candles & Reed Diffusers":"Household","Carrier Bags":"Household","Dishwashing":"Household","Flowers":"Household","Food Bags, Foil & Cling Film":"Household","House Cleaning":"Household","Laundry":"Household","Toilet Roll, Kitchen Roll & Tissues":"Household",
+ "Cat Food":"Household","Cat Litter":"Household","Cat Treats":"Household","Dog Accessories":"Household","Dog Food":"Household","Dog Treats":"Household",
+ "Chips & Potato":"Frozen & Convenience","Fish & Seafood":"Frozen & Convenience","Frozen Vegetarian Food":"Frozen & Convenience","Fruit & Smoothies":"Frozen & Convenience","Ice Cream & Desserts":"Frozen & Convenience","Meat & Poultry":"Frozen & Convenience","Party Food, Snacks & Pies":"Frozen & Convenience","Pizzas & Garlic Bread":"Frozen & Convenience","Vegetables & Sides":"Frozen & Convenience","Frozen Vegetarian":"Frozen & Convenience",
+ "Cereals & Snack Bars":"Cereals",
+ "Biscuits & Crackers":"Snacks & Sweets","Chocolate & Sweets":"Snacks & Sweets","Desserts & Sweet Treats":"Snacks & Sweets",
+ "Bagels":"Bread & Pastries","Bread":"Bread & Pastries","Bread Rolls":"Bread & Pastries","Breakfast Pastries":"Bread & Pastries","Cakes":"Bread & Pastries","Scones & Teacakes":"Bread & Pastries","Sweet Treats":"Bread & Pastries","Wraps, Naans, Pittas & Thins":"Bread & Pastries",
+ "Coffee":"Tea & Coffee","Tea":"Tea & Coffee","Hot Chocolate & Malted Drinks":"Tea & Coffee"
+};
+const TOP_AISLE={"SpecialBuys":"Middle Aisle","Christmas & New Year":"Middle Aisle","Autumn Range":"Middle Aisle","Frozen Food":"Frozen & Convenience","Bakery":"Bread & Pastries","Alcohol":"Juice & Drinks","Home Essentials":"Household","Pet Care":"Household","Health & Beauty":"Baby & Care","Baby & Toddler":"Baby & Care"};
+function rangeAisle(name,c,d){
+  const n=(name||"").toLowerCase(), sub=SUB_AISLE[d];
+  // A few refinements inside Aldi's broader sections
+  if(sub==="Fruits & Vegetables"&&/potato|onion/.test(n)) return "Potatoes & Onions";
+  if(sub==="Milk & Cheese"&&/yog|fromage/.test(n)) return "Yoghurts & Desserts";
+  if(sub) return sub;
+  if(TOP_AISLE[c]) return TOP_AISLE[c];
+  const a=aisleFor(name); if(a!=="Other") return a;
+  return CAT_AISLE[c]||"Other";
+}
 function titleCase(b){return (b||"").toLowerCase().replace(/(^|[\s(&-])\w/g,x=>x.toUpperCase())}
 function fromRange(r){return {name:niceName(r.n),brand:titleCase(r.b),size:niceSize(r.n,r.z),price:r.p,c:r.c,d:r.d,a:r.a||"",i:r.i||""}}
 function imgUrl(i,w){return i?`https://dm.emea.cms.aldi.cx/is/image/aldiprodeu/product/jpg/scaleWidth/${w||160}/${i}`:""}
