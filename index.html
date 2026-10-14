@@ -205,7 +205,20 @@ body.shop .wrap{padding-block-end:40px}
 @media (prefers-reduced-motion:no-preference){.autorow input,.autorow input::after{transition:all .2s}}
 .autorow>span{display:flex;flex-direction:column;gap:1px;font-size:15px}
 .autorow>span span{font-size:13px;color:var(--muted);font-weight:600}
-.chip{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--bg)}
+.sedit{display:flex;flex-direction:column;gap:12px}
+.srename{display:flex;flex-direction:column;gap:6px}
+.srows{display:flex;flex-direction:column}
+.srow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1.5px dashed var(--line)}
+.srow:last-child{border-bottom:0}
+.srow .thumb{width:44px;height:44px;flex:none;border-radius:12px;background:#FFFFFF;display:grid;place-items:center;overflow:hidden;color:#5B6A63}
+.srow .thumb img{width:100%;height:100%;object-fit:contain}
+.srow .thumb svg{width:24px;height:24px}
+.srow .sn{flex:1;min-width:0;display:flex;flex-direction:column}
+.srow .sn b{font-size:15.5px;font-weight:800;overflow-wrap:anywhere}
+.srow .sn span{font-size:12.5px;color:var(--muted);font-weight:600}
+.srow .qty button{width:34px;height:34px}
+.sx{border:0;background:var(--bg);width:34px;height:34px;border-radius:50%;font-size:20px;line-height:1;color:var(--over);flex:none}
+.chip{border:0;cursor:pointer;color:inherit;font-family:inherit;font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--bg)}
 h2.sect{font-weight:800;font-size:24px;margin:26px 0 0}
 .page-top{padding-top:18px}
 .note{font-size:14px;color:var(--muted);margin-top:6px;font-weight:600}
@@ -232,7 +245,7 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
 <header class="band">
   <div class="bandin">
     <div class="toprow">
-      <button class="store" id="storeBtn" aria-label="Change store"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD25A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg><span id="storeName">Aldi, Chadderton</span><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="store" id="storeBtn" aria-label="Change store"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD25A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg><span id="storeName">Choose your Aldi</span><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="shopbtn" id="shopBtn"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.3"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span id="shopBtnLabel">Shop</span></button>
     </div>
     <h1>Grocery List</h1>
@@ -256,7 +269,7 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
       <button class="btn" type="submit">Set</button>
     </form>
     <form class="budgetedit" id="storeForm" hidden>
-      <input class="field" id="storeInput" placeholder="Your Aldi, e.g. Chadderton" aria-label="Your Aldi store">
+      <input class="field" id="storeInput" placeholder="Your Aldi's town or area" aria-label="Your Aldi store">
       <button class="btn" type="submit">Save</button>
     </form>
   </section>
@@ -298,6 +311,12 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
   <section id="tab-about" class="page-top" hidden>
     <h2 class="sect">Household list</h2>
     <div class="card" id="hhArea"></div>
+    <h2 class="sect">Share the app</h2>
+    <div class="card">
+      <p style="margin-top:0">Send the app to friends so they can make their own list with their partner. This doesn't share your list; their list stays completely separate.</p>
+      <div class="code" id="appLink"></div>
+      <div class="row"><button class="btn yellow" id="appShare">Share the app</button><button class="btn ghost" id="appCopy">Copy link</button></div>
+    </div>
     <h2 class="sect">Appearance</h2>
     <div class="card">
       <div class="seg" role="radiogroup" aria-label="Theme">
@@ -425,10 +444,14 @@ const BRING_LIST = {name:"Weekly staples",items:[
  {ref:"a24",qty:1},{cref:"cb9",qty:1},{cref:"cb10",qty:1},{cref:"cb11",qty:1},{cref:"cb12",qty:1}]};
 function addBring(st){
   for(const L of st.saved||[]) if(L.auto===undefined) L.auto=(L.name==="Weekly staples");
-  if(st.bringAdded) return st;
-  for(const [k,v] of Object.entries(BRING_CUSTOM)) if(!st.custom[k]) st.custom[k]={...v};
-  st.saved.unshift({...JSON.parse(JSON.stringify(BRING_LIST)),auto:true});
-  st.bringAdded=true; return st;
+  if(st.bringAdded){ if(st.store===undefined||st.store==="") st.store=st.storeSet?st.store:"Chadderton"; st.storeSet=true; return st; }
+  if(!(st.saved||[]).length) st.saved=[{name:"Weekly staples",items:[],auto:true}];
+  st.bringAdded=true; st.storeSet=true; return st;
+}
+// Optional starter: a ready-made list of 15 everyday Aldi items anyone can load into an empty list
+function loadStarter(L){
+  for(const [k,v] of Object.entries(BRING_CUSTOM)) if(!S.custom[k]) S.custom[k]={...v};
+  L.items=JSON.parse(JSON.stringify(BRING_LIST.items));
 }
 function exampleState(){
   return {budget:6000,example:false,myPrices:{},custom:{},list:[],saved:[],history:[],aisles:[],itemAisle:{}};
@@ -442,10 +465,10 @@ function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}}
 const MAPS=["items","myPrices","custom","itemAisle"];
 function toDoc(st){const items={};st.list.forEach((it,i)=>{items[it.key]={ref:it.ref||null,cref:it.cref||null,sku:it.sku||null,snap:it.snap||null,qty:it.qty,inTrolley:!!it.inTrolley,o:i}});
-  return {items,myPrices:st.myPrices||{},custom:st.custom||{},itemAisle:st.itemAisle||{},budget:st.budget,saved:st.saved||[],history:st.history||[],aisles:st.aisles||[],store:st.store||"",bringAdded:!!st.bringAdded}}
+  return {items,myPrices:st.myPrices||{},custom:st.custom||{},itemAisle:st.itemAisle||{},budget:st.budget,saved:st.saved||[],history:st.history||[],aisles:st.aisles||[],store:st.store||"",storeSet:!!st.storeSet,bringAdded:!!st.bringAdded}}
 function fromDoc(d){const base=exampleState();
   const list=Object.entries(d.items||{}).map(([key,v])=>({key,ref:v.ref||undefined,cref:v.cref||undefined,sku:v.sku||undefined,snap:v.snap||undefined,qty:v.qty||1,inTrolley:!!v.inTrolley,o:v.o||0})).sort((x,y)=>x.o-y.o);
-  return Object.assign(base,{list,myPrices:d.myPrices||{},custom:d.custom||{},itemAisle:d.itemAisle||{},budget:d.budget||base.budget,saved:d.saved||[],history:d.history||[],aisles:d.aisles||[],store:d.store||"",bringAdded:!!d.bringAdded})}
+  return Object.assign(base,{list,myPrices:d.myPrices||{},custom:d.custom||{},itemAisle:d.itemAisle||{},budget:d.budget||base.budget,saved:d.saved||[],history:d.history||[],aisles:d.aisles||[],store:d.store||"",storeSet:!!d.storeSet,bringAdded:!!d.bringAdded})}
 let remote=null, lastDoc=null, unsub=null, pendingRender=false, household=lsGet(LS_HH);
 function persist(){
   lsSet(LS_KEY,JSON.stringify(S));
@@ -518,11 +541,11 @@ function renderHousehold(){
     $("#hhStart").onclick=()=>{setHousehold(newCode());toast("Household list started")};
     $("#hhJoin").onsubmit=e=>{e.preventDefault();const v=$("#hhCode").value.trim().toLowerCase().replace(/^.*join=/,"");if(v.replace(/-/g,"").length<20){toast("That code looks too short");return}setHousehold(v)};
   } else {
-    box.innerHTML=`<h3>Shared household list</h3><p>Send this link to the other phone. Opening it joins this list. Keep it between you, as anyone with the link can see and change the list.</p>
+    box.innerHTML=`<h3>Shared household list</h3><p>Send this link to your partner only. Opening it joins your list, so anyone with it can see and change your list. To give the app to friends, use Share the app below instead.</p>
       <div class="code" id="hhLink"></div>
       <div class="row"><button class="btn" id="hhShare">Send link</button><button class="btn ghost" id="hhCopy">Copy link</button><button class="btn ghost" id="hhLeave">Leave on this phone</button></div>`;
     $("#hhLink").textContent=joinLink();
-    $("#hhShare").onclick=async()=>{try{if(navigator.share){await navigator.share({title:"Our shopping list",text:"Join our Weekly Shop Tally list",url:joinLink()});return}}catch(e){if(e&&e.name==="AbortError")return}copyLink()};
+    $("#hhShare").onclick=async()=>{try{if(navigator.share){await navigator.share({title:"Our shopping list",text:"Join our Grocery List",url:joinLink()});return}}catch(e){if(e&&e.name==="AbortError")return}copyLink()};
     $("#hhCopy").onclick=copyLink;
     const lv=$("#hhLeave"); lv.onclick=()=>{if(!lv.dataset.sure){lv.dataset.sure="1";lv.textContent="Tap again to leave";return}household=null;lsSet(LS_HH,null);connectRemote();render();toast("This phone has left the shared list")};
   }
@@ -596,7 +619,7 @@ let openKey=null;
 function render(){
   $("#checkedDate").textContent=LIVE.updatedMs?priceLabel(new Date(LIVE.updatedMs)):CHECKED;
   const {plan,cart,needs}=totals(), b=S.budget;
-  $("#storeName").textContent="Aldi, "+(S.store||"Chadderton");
+  $("#storeName").textContent=S.store?"Aldi, "+S.store:"Choose your Aldi";
   $("#heroLbl").textContent=shopMode?"In your trolley":"List total";
   $("#spent").textContent=gbp(shopMode?cart:plan);
   $("#budgetVal").textContent=gbp(b).replace(".00","");
@@ -877,6 +900,61 @@ $("#budgetBtn").onclick=()=>{const f=$("#budgetForm");f.hidden=!f.hidden;$("#sto
 $("#budgetForm").addEventListener("submit",e=>{e.preventDefault();const p=parsePounds($("#budgetInput").value);if(!p){toast("Enter a budget, like 60");return}S.budget=p;$("#budgetForm").hidden=true;persist();render();toast("Budget set to "+gbp(p))});
 
 // ---------- staples ----------
+let editingSaved=null;
+// Find products for any search box: full Aldi range when loaded, else the built-in list, plus the household's own items
+function findProducts(text,limit){
+  const q=norm(text).trim(); if(!q) return [];
+  const words=q.split(/\s+/), out=[];
+  if(RANGE.length){
+    const score=x=>{let sc=0;for(const w of words){const i=x.h.indexOf(w);if(i<0)return -1;sc+=(i===0||x.h[i-1]===" "?2:1);if(x.nn.endsWith(w)||x.nn.endsWith(w+"s"))sc+=4;if(x.nn===w)sc+=4;if(norm(x.d||"").includes(w))sc+=3}if(x.p!=null)sc+=1;return sc};
+    for(const [x] of RANGE.map(x=>[x,score(x)]).filter(([,sc])=>sc>=0).sort((a,b)=>b[1]-a[1]||a[0].n.length-b[0].n.length).slice(0,limit||8)){
+      const r=fromRange(x); out.push({item:{sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a,i:r.i}},img:x.i});}
+  } else for(const c of CAT.filter(c=>{const h=norm(c.name+" "+c.brand+" "+c.size);return words.every(w=>h.includes(w))}).slice(0,limit||8)) out.push({item:{ref:c.id},img:""});
+  for(const [k,c] of Object.entries(S.custom).filter(([k,c])=>words.every(w=>norm(c.name).includes(w))).slice(0,3)) out.push({item:{cref:k},img:""});
+  return out;
+}
+function savedEditor(L,idx){
+  const c=document.createElement("div"); c.className="card sedit";
+  c.innerHTML=`<label class="srename"><span class="lbl">List name</span><input class="field" id="se-name" value="${esc(L.name)}"></label>
+    <div class="srows"></div>
+    <label class="searchbox" for="se-search"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="se-search" type="search" autocomplete="off" placeholder="Add an item to ${esc(L.name)}"></label>
+    <div class="results" id="se-results" hidden></div>
+    <div class="row" style="margin-top:12px"><button class="btn sdone">Done</button><button class="btn ghost small sfrom">Replace with this week's list</button></div>`;
+  const rows=c.querySelector(".srows");
+  if(!L.items.length) rows.innerHTML='<p style="margin:0">No items yet. Search below to add some.</p>';
+  L.items.forEach((it,i)=>{const f=info(it);
+    const r=document.createElement("div"); r.className="srow";
+    r.innerHTML=`<span class="thumb">${f.img?`<img src="${imgUrl(f.img,120)}" alt="" loading="lazy">`:iconFor(f)}</span><span class="sn"><b></b><span></span></span>
+      <div class="qty" aria-label="How many"><button class="qm" aria-label="One less"${it.qty<=1?" disabled":""}>−</button><span>${it.qty}</span><button class="qp" aria-label="One more">+</button></div>
+      <button class="sx" aria-label="Remove ${esc(f.name)}">×</button>`;
+    r.querySelector(".sn b").textContent=f.name;
+    r.querySelector(".sn span").textContent=[f.brand,f.size].filter(Boolean).join(" · ");
+    const im=r.querySelector(".thumb img"); if(im) im.onerror=()=>{im.parentNode.innerHTML=iconFor(f)};
+    r.querySelector(".qm").onclick=()=>{if(it.qty>1){it.qty--;persist();render()}};
+    r.querySelector(".qp").onclick=()=>{it.qty++;persist();render()};
+    r.querySelector(".sx").onclick=()=>{L.items.splice(i,1);persist();render();toast("Removed "+f.name)};
+    rows.appendChild(r);});
+  const nm=c.querySelector("#se-name");
+  nm.onchange=()=>{const v=nm.value.trim();if(v){L.name=v;persist();render()}};
+  const sb=c.querySelector("#se-search"), res=c.querySelector("#se-results");
+  sb.oninput=()=>{res.innerHTML="";const found=findProducts(sb.value,8);
+    for(const {item,img} of found){const f=info(item);
+      const b=document.createElement("button"); b.className="res";
+      b.innerHTML=`<span class="thumb">${img?`<img src="${imgUrl(img,120)}" alt="" loading="lazy">`:iconFor(f)}</span><span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;
+      b.querySelector(".n").innerHTML=esc(f.name)+`<span>${esc([f.brand,f.size].filter(Boolean).join(" · "))}</span>`;
+      b.onclick=()=>{const ex=L.items.find(y=>sameItem(y,item));if(ex)ex.qty++;else L.items.push({ref:item.ref||null,cref:item.cref||null,sku:item.sku||null,snap:item.snap||null,qty:1});
+        persist();render();toast("Added "+f.name+" to "+L.name);setTimeout(()=>{const i=document.getElementById("se-search");if(i)i.focus()},50)};
+      res.appendChild(b);}
+    if(sb.value.trim()){const own=document.createElement("button");own.className="res custom";own.innerHTML=`<span class="n">Add “${esc(sb.value.trim())}” as my own item</span>`;
+      own.onclick=()=>{const name=sb.value.trim();let k=Object.keys(S.custom).find(k=>S.custom[k].name.toLowerCase()===name.toLowerCase());
+        if(!k){k="c"+uid();S.custom[k]={name,price:null,aisle:guessAisle(name)}}
+        if(!L.items.some(y=>y.cref===k))L.items.push({cref:k,qty:1});persist();render();toast("Added "+name+" to "+L.name)};
+      res.appendChild(own);}
+    res.hidden=!sb.value.trim();};
+  c.querySelector(".sdone").onclick=()=>{const v=nm.value.trim();if(v)L.name=v;editingSaved=null;persist();render();toast("Saved "+L.name)};
+  c.querySelector(".sfrom").onclick=()=>{if(!S.list.length){toast("This week's list is empty");return}L.items=S.list.map(x=>({ref:x.ref||null,cref:x.cref||null,sku:x.sku||null,snap:x.snap||null,qty:x.qty}));persist();render();toast(L.name+" now matches this week's list")};
+  return c;
+}
 function renderStaples(){
   const a=$("#staplesArea"); a.innerHTML="";
   if(!S.saved.length){a.innerHTML='<div class="empty"><b>No saved lists yet</b>Build this week\'s list, then save it below as your weekly staples.</div>'}
@@ -884,13 +962,22 @@ function renderStaples(){
     const tot=L.items.reduce((s,it)=>s+info(it).price*it.qty,0);
     const miss=L.items.filter(it=>info(it).needs).length;
     const c=document.createElement("div"); c.className="card";
-    c.innerHTML=`<h3></h3><p>${L.items.length} items · about <span class="mono">${gbp(tot)}</span> at today's prices${miss?` · ${miss} still need a price`:""}</p><div class="chips"></div><label class="autorow"><input type="checkbox" class="autochk" id="auto-${idx}"${L.auto?" checked":""}><span><b>Add to every new list</b><span>Goes on automatically each time you finish a shop</span></span></label><div class="row"><button class="btn small add">Add to this week</button><button class="btn ghost small upd">Replace with current list</button><button class="btn ghost small del">Delete</button></div>`;
+    if(editingSaved===idx){a.appendChild(savedEditor(L,idx));return}
+    if(!L.items.length){
+      c.innerHTML=`<h3></h3><p>Nothing in here yet. Build this week's list, then tap "Save current list here", and it'll go on every new list automatically.</p><div class="row"><button class="btn small additems">Add items</button><button class="btn ghost small usecur">Save current list here</button><button class="btn ghost small starter">Use a starter list</button></div><p style="margin-top:8px">The starter list has 15 everyday Aldi items, like milk, bread, bananas and fish fingers. You can change it after.</p>`;
+      c.querySelector("h3").textContent=L.name;
+      c.querySelector(".usecur").onclick=()=>{if(!S.list.length){toast("Add some items to this week's list first");return}L.items=S.list.map(x=>({ref:x.ref||null,cref:x.cref||null,sku:x.sku||null,snap:x.snap||null,qty:x.qty}));persist();render();toast("Saved "+L.name)};
+      c.querySelector(".starter").onclick=()=>{loadStarter(L);persist();render();toast("Starter list loaded into "+L.name)};
+      c.querySelector(".additems").onclick=()=>{editingSaved=idx;render();setTimeout(()=>{const i=document.getElementById("se-search");if(i)i.focus()},50)};
+      a.appendChild(c); return;
+    }
+    c.innerHTML=`<h3></h3><p>${L.items.length} item${L.items.length===1?"":"s"} · about <span class="mono">${gbp(tot)}</span> at today's prices${miss?` · ${miss} still need a price`:""}</p><div class="chips"></div><label class="autorow"><input type="checkbox" class="autochk" id="auto-${idx}"${L.auto?" checked":""}><span><b>Add to every new list</b><span>Goes on automatically each time you finish a shop</span></span></label><div class="row"><button class="btn small add">Add to this week</button><button class="btn ghost small edit">Edit list</button><button class="btn ghost small del">Delete</button></div>`;
     c.querySelector("h3").textContent=L.name;
     c.querySelector(".autochk").onchange=e=>{L.auto=e.target.checked;persist();toast(L.auto?L.name+" will be added to every new list":L.name+" won't be added automatically")};
     const ch=c.querySelector(".chips");
-    for(const it of L.items){const s=document.createElement("span");s.className="chip";s.textContent=(it.qty>1?it.qty+"× ":"")+info(it).name;ch.appendChild(s)}
+    for(const it of L.items){const s=document.createElement("button");s.className="chip";s.textContent=(it.qty>1?it.qty+"× ":"")+info(it).name;s.onclick=()=>{editingSaved=idx;render()};ch.appendChild(s)}
     c.querySelector(".add").onclick=()=>{dropExample();for(const it of L.items)addItem({ref:it.ref||undefined,cref:it.cref||undefined,sku:it.sku||undefined,snap:it.snap||undefined,qty:it.qty});persist();render();switchTab("list");toast("Added "+L.name)};
-    c.querySelector(".upd").onclick=()=>{if(!S.list.length){toast("This week's list is empty");return}L.items=S.list.map(x=>({ref:x.ref||null,cref:x.cref||null,sku:x.sku||null,snap:x.snap||null,qty:x.qty}));persist();render();toast("Updated "+L.name)};
+    c.querySelector(".edit").onclick=()=>{editingSaved=idx;render()};
     const del=c.querySelector(".del");
     del.onclick=()=>{if(del.dataset.sure){S.saved.splice(idx,1);persist();render()}else{del.dataset.sure="1";del.textContent="Tap again to delete"}};
     a.appendChild(c);
@@ -909,6 +996,11 @@ $("#newListForm").addEventListener("submit",e=>{e.preventDefault();
 function switchTab(t){for(const n of ["list","staples","about"]){$("#tab-"+n).hidden=n!==t;$("#t-"+n).setAttribute("aria-selected",n===t)}window.scrollTo(0,0)}
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 $("#exitShop").onclick=()=>setShop(false);
+const appLink=()=>location.origin+location.pathname;
+$("#appLink").textContent=appLink();
+async function copyApp(){try{await navigator.clipboard.writeText(appLink());toast("Link copied")}catch(e){const r=document.createRange();r.selectNodeContents($("#appLink"));const sl=getSelection();sl.removeAllRanges();sl.addRange(r);toast("Link selected, copy it from here")}}
+$("#appShare").onclick=async()=>{try{if(navigator.share){await navigator.share({title:"Grocery List",text:"An Aldi shopping list with real shelf prices and a budget tracker. Open it and tap Settings to start your own list.",url:appLink()});return}}catch(e){if(e&&e.name==="AbortError")return}copyApp()};
+$("#appCopy").onclick=copyApp;
 function applyTheme(t){
   if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme");
   try{if(t==="light"||t==="dark")localStorage.setItem("wst-theme",t);else localStorage.removeItem("wst-theme")}catch(e){}
@@ -919,7 +1011,7 @@ function applyTheme(t){
 document.querySelectorAll("[data-theme-opt]").forEach(b=>b.onclick=()=>applyTheme(b.dataset.themeOpt==="auto"?null:b.dataset.themeOpt));
 {let t=null;try{t=localStorage.getItem("wst-theme")}catch(e){}applyTheme(t)}
 $("#shopBtn").onclick=()=>setShop(!shopMode);
-$("#storeBtn").onclick=()=>{const f=$("#storeForm");f.hidden=!f.hidden;$("#budgetForm").hidden=true;if(!f.hidden){$("#storeInput").value=S.store||"Chadderton";$("#storeInput").focus()}};
+$("#storeBtn").onclick=()=>{const f=$("#storeForm");f.hidden=!f.hidden;$("#budgetForm").hidden=true;if(!f.hidden){$("#storeInput").value=S.store||"";$("#storeInput").focus()}};
 $("#storeForm").addEventListener("submit",e=>{e.preventDefault();const v=$("#storeInput").value.trim().replace(/^aldi,?\s*/i,"");if(!v){toast("Type your Aldi's town or area");return}S.store=v;$("#storeForm").hidden=true;persist();render();toast("Store set to Aldi, "+v)});
 document.addEventListener("click",e=>{if(openKey&&!e.target.closest(".item.open")){openKey=null;render()}});
 $("#goHousehold").onclick=()=>switchTab("about");
