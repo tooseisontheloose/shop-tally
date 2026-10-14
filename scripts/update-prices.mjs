@@ -112,7 +112,7 @@ export function pick(item, products) {
   return null;
 }
 
-const tidyBrand = b => (b || "").toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+const tidyBrand = b => (b || "").toLowerCase().replace(/(^|[\s(&-])\w/g, c => c.toUpperCase());
 
 async function main() {
   const { items } = JSON.parse(await readFile("scripts/items.json", "utf8"));
@@ -148,7 +148,7 @@ async function main() {
     if (p) {
       found++;
       const entry = { price: p.p, sku: p.s };
-      if (item.match) { entry.name = p.n; entry.brand = tidyBrand(p.b); entry.size = p.z; }
+      if (item.match || item.keepDetails) { entry.name = p.n; entry.brand = tidyBrand(p.b); entry.size = p.z; }
       if (!oldPrices.items[item.id] || oldPrices.items[item.id].price !== entry.price) changed++;
       out[item.id] = entry;
     } else if (oldPrices.items[item.id]) {

@@ -246,63 +246,92 @@
   },
   {
    "id": "cb1",
-   "q": "coconut yogurt",
-   "match": "coconut"
+   "q": "Coconut Greek Style Yogurt",
+   "name": "Coconut Greek Style Yogurt",
+   "brand": "BROOKLEA",
+   "keepDetails": true
   },
   {
    "id": "cb2",
-   "q": "cheese slices",
-   "match": "slices"
+   "q": "Cheese Slices 8 Pack",
+   "name": "Cheese Slices 8 Pack",
+   "brand": "EMPORIUM",
+   "keepDetails": true
   },
   {
    "id": "cb3",
-   "q": "white bread",
-   "match": "white|toastie"
+   "q": "White Toastie Sliced Loaf",
+   "name": "White Toastie Sliced Loaf",
+   "brand": "VILLAGE BAKERY",
+   "size": "800 g",
+   "keepDetails": true
   },
   {
    "id": "cb4",
-   "q": "sourdough",
-   "match": "sourdough"
+   "q": "White Sourdough Sliced Loaf",
+   "name": "White Sourdough Sliced Loaf",
+   "brand": "SPECIALLY SELECTED",
+   "size": "500 g",
+   "keepDetails": true
   },
   {
    "id": "cb5",
-   "q": "ice lollies",
-   "match": "lolly|lollies"
+   "q": "Rocket Lollies 8 Pack",
+   "name": "Rocket Lollies 8 Pack",
+   "brand": "GIANNI'S",
+   "keepDetails": true
   },
   {
    "id": "cb6",
-   "q": "fish fingers",
-   "match": "fish fingers"
+   "q": "Fish Fingers 10 Pack",
+   "name": "Fish Fingers 10 Pack",
+   "brand": "EVERYDAY ESSENTIALS",
+   "size": "250 g",
+   "keepDetails": true
   },
   {
    "id": "cb7",
-   "q": "kitchen roll",
-   "match": "kitchen"
+   "q": "Jumbo Kitchen Towel",
+   "name": "Jumbo Kitchen Towel",
+   "brand": "EVERYDAY ESSENTIALS",
+   "keepDetails": true
   },
   {
    "id": "cb8",
-   "q": "babybel",
-   "match": "babybel"
+   "q": "Original Mini Babybels 10 Pack",
+   "name": "Original Mini Babybels 10 Pack",
+   "brand": "BABYBEL",
+   "keepDetails": true
   },
   {
    "id": "cb9",
-   "q": "sweetcorn",
-   "match": "sweetcorn"
+   "q": "Supersweet Sweetcorn in Water",
+   "name": "Supersweet Sweetcorn in Water",
+   "brand": "FOUR SEASONS",
+   "size": "285 g",
+   "keepDetails": true
   },
   {
    "id": "cb10",
-   "q": "macaroni",
-   "match": "macaroni"
+   "q": "Macaroni Pasta 500g",
+   "name": "Macaroni Pasta 500g",
+   "brand": "CUCINA",
+   "size": "500 g",
+   "keepDetails": true
   },
   {
    "id": "cb11",
-   "q": "protein granola",
-   "match": "granola"
+   "q": "Chocolate Protein Granola",
+   "name": "Chocolate Protein Granola",
+   "brand": "HARVEST MORN",
+   "keepDetails": true
   },
   {
    "id": "cb12",
-   "q": "baking potatoes",
-   "match": "potato"
+   "q": "Baking Potato",
+   "name": "Baking Potato",
+   "brand": "NATURE'S PICK",
+   "keepDetails": true
   }
  ]
 }

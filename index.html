@@ -459,11 +459,11 @@ let RANGE=[], RANGE_BY={};
 const CAT_AISLE={"Fresh Food":"Fruits & Vegetables","Bakery":"Bread & Pastries","Frozen Food":"Frozen & Convenience","Drinks":"Juice & Drinks","Food Cupboard":"Tins & Jars","Chilled Food":"Milk & Cheese","Household":"Household","Health & Beauty":"Baby & Care","Baby & Toddler":"Baby & Care","Pet Care":"Household","Alcohol":"Juice & Drinks","Beers & Ciders":"Juice & Drinks","Wine":"Juice & Drinks","Spirits":"Juice & Drinks"};
 const SUB_AISLE={"Fruit":"Fruits & Vegetables","Vegetables":"Fruits & Vegetables","Salad":"Fruits & Vegetables","Meat":"Meat & Fish","Fish":"Meat & Fish","Poultry":"Meat & Fish","Milk":"Milk & Cheese","Cheese":"Milk & Cheese","Yogurts":"Yoghurts & Desserts","Chilled Desserts":"Yoghurts & Desserts","Biscuits & Crackers":"Snacks & Sweets","Chocolate & Sweets":"Snacks & Sweets","Crisps & Snacks":"Crisps & Nuts","Cereals & Snack Bars":"Cereals","Pasta, Rice & Grains":"Pasta & Rice","Tea & Coffee":"Tea & Coffee","Eggs":"Eggs"};
 function niceName(n){return n.replace(/\s*<?\d+(\.\d+)?%\s*Fat\b/ig,"").replace(/\s{2,}/g," ").trim()}
-function niceSize(name,z){const m=/milk/i.test(name)&&!/chocolate|biscuit|evaporated|condensed|powder/i.test(name)&&/^([\d.]+)\s*l$/i.exec(z||"");
+function niceSize(name,z){const m=/milk/i.test(name)&&!/milk chocolate|biscuit|evaporated|condensed|powder|coconut/i.test(name)&&/^([\d.]+)\s*l$/i.exec(z||"");
   if(!m) return z||""; const pt=Math.round(parseFloat(m[1])*1.7598*4)/4; return (pt%1===0?pt:pt.toFixed(2).replace(/0$/,""))+" pints"}
 function rangeAisle(name,c,d){const a=aisleFor(name);if(a!=="Other")return a;return SUB_AISLE[d]||CAT_AISLE[c]||"Other"}
-function titleCase(b){return (b||"").toLowerCase().replace(/\b\w/g,x=>x.toUpperCase())}
-function fromRange(r){return {name:niceName(r.n),brand:titleCase(r.b),size:niceSize(r.n,r.z),price:r.p,c:r.c,d:r.d}}
+function titleCase(b){return (b||"").toLowerCase().replace(/(^|[\s(&-])\w/g,x=>x.toUpperCase())}
+function fromRange(r){return {name:niceName(r.n),brand:titleCase(r.b),size:niceSize(r.n,r.z),price:r.p,c:r.c,d:r.d,a:r.a||""}}
 async function loadRange(){
   try{const r=await fetch("catalogue.json",{cache:"no-cache"});if(!r.ok)return;const j=await r.json();
     RANGE=(j.products||[]).map(x=>({...x,h:norm(niceName(x.n)+" "+x.b+" "+x.z),nn:norm(niceName(x.n)).replace(/\s+/g," ").trim()}));RANGE_BY={};for(const x of RANGE)RANGE_BY[x.s]=x;render();}catch(e){}
@@ -471,8 +471,9 @@ async function loadRange(){
 function info(it){
   if(it.sku){const r=RANGE_BY[it.sku], base=r?fromRange(r):(it.snap||{name:"Item",brand:"",size:"",price:0}), own=ownOf(S.myPrices["s"+it.sku]);
     const m0=(S.itemAisle||{})["s"+it.sku], moved=AISLES.includes(m0)?m0:null;
-    const useOwn=own&&(!r||own.t>LIVE.updatedMs);
-    return {name:base.name,brand:base.brand,size:base.size,price:useOwn?own.p:base.price,own:!!useOwn,aisle:moved||rangeAisle(base.name,base.c,base.d)}}
+    const useOwn=own&&(!r||r.p==null||own.t>LIVE.updatedMs);
+    const pr=useOwn?own.p:base.price;
+    return {name:base.name,brand:base.brand,size:base.size,price:pr==null?0:pr,needs:pr==null,own:!!useOwn,aisle:moved||(AISLES.includes(base.a)?base.a:rangeAisle(base.name,base.c,base.d))}}
   const k=it.ref||it.cref, m0=(S.itemAisle||{})[k], moved=AISLES.includes(m0)?m0:null, live=LIVE.items[k];
   if(it.ref){const c=CAT_BY_ID[it.ref]; if(!c) return {name:"Item",brand:"",size:"",price:0,aisle:"Other",own:false};
     const base=live&&typeof live.price==="number"?live.price:c.price, own=ownOf(S.myPrices[it.ref]);
@@ -656,7 +657,7 @@ search.addEventListener("input",()=>{
   const q=norm(search.value).trim();
   if(!q){results.hidden=true;return}
   const words=q.split(/\s+/);
-  const score=x=>{let sc=0;for(const w of words){const i=x.h.indexOf(w);if(i<0)return -1;sc+=(i===0||x.h[i-1]===" "?2:1);if(x.nn.endsWith(w)||x.nn.endsWith(w+"s"))sc+=4;if(x.nn===w)sc+=4}return sc};
+  const score=x=>{let sc=0;for(const w of words){const i=x.h.indexOf(w);if(i<0)return -1;sc+=(i===0||x.h[i-1]===" "?2:1);if(x.nn.endsWith(w)||x.nn.endsWith(w+"s"))sc+=4;if(x.nn===w)sc+=4;if(norm(x.d||"").includes(w))sc+=3}if(x.p!=null)sc+=1;return sc};
   const rhits=RANGE.length?RANGE.map(x=>[x,score(x)]).filter(([,sc])=>sc>=0).sort((a,b)=>b[1]-a[1]||a[0].n.length-b[0].n.length).slice(0,12).map(([x])=>x):[];
   const hits=RANGE.length?[]:CAT.filter(c=>{const h=norm(c.name+" "+c.brand+" "+c.size);return words.every(w=>h.includes(w))}).slice(0,8);
   const customs=Object.entries(S.custom).filter(([k,c])=>words.every(w=>norm(c.name).includes(w))).slice(0,4);
@@ -670,9 +671,9 @@ search.addEventListener("input",()=>{
   }
   for(const x of rhits){ const f=info({sku:x.s});
     const b=document.createElement("button"); b.className="res";
-    b.innerHTML=`<span class="n"></span><span class="p">${gbp(f.price)}</span>`;
-    b.querySelector(".n").innerHTML=esc(f.name)+`<span>${esc([f.brand,f.size].filter(Boolean).join(" · "))}</span>`;
-    b.onclick=()=>{const r=fromRange(x);dropExample();addItem({sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d}});done(f.name)};
+    b.innerHTML=`<span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;
+    b.querySelector(".n").innerHTML=esc(f.name)+`<span>${esc([f.brand,f.size].filter(Boolean).join(" · ")||(f.needs?"Add the price in the shop":""))}</span>`;
+    b.onclick=()=>{const r=fromRange(x);dropExample();addItem({sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a}});done(f.name)};
     results.appendChild(b);
   }
   for(const [k,c] of customs){
