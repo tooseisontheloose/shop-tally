@@ -87,6 +87,7 @@ button{cursor:pointer}
 /* Shop mode progress */
 .shopbar{margin-top:12px;background:var(--surface);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
 .sbtop{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800}
+.shophint{margin:0;font-size:13.5px;color:var(--muted);font-weight:600}
 .sprog{height:8px;border-radius:4px;background:var(--track);overflow:hidden}
 .sprog i{display:block;height:100%;width:0;background:var(--accent);border-radius:4px}
 
@@ -147,6 +148,7 @@ div.res{padding-right:10px}
 .badge{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;font-size:18px;line-height:1;background:color-mix(in srgb,var(--tint) calc(100% - var(--tile-mix)),var(--surface));flex:none}
 .items{display:flex;flex-direction:column;gap:6px}
 .item{position:relative;border-radius:18px;overflow:hidden;background:var(--surface);isolation:isolate}
+.item:not(.open):not(.swiping) .under{visibility:hidden}
 .item .under{position:absolute;right:0;top:0;bottom:0;width:88px;z-index:0;border:0;background:#D70015;color:#FFFFFF;font-weight:800}
 .rowin{position:relative;z-index:1;display:flex;align-items:center;gap:12px;padding:10px 12px;min-height:74px;background:var(--surface);touch-action:pan-y}
 .item.open .rowin{transform:translateX(-88px)}
@@ -188,7 +190,7 @@ body.shop .add, body.shop #addPanel, body.shop #hhBanner, body.shop nav.tabs{dis
 body.shop .rowin{min-height:86px;padding:12px 14px}
 body.shop .ico{width:62px;height:62px}
 body.shop .name b{font-size:19px}
-body.shop .tick{width:46px;height:46px;border-width:3px}
+body.shop .tick{display:none}
 body.shop .rowin{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 body.shop .rowin:active{background:var(--accent-soft)}
 body.shop .wrap{padding-block-end:40px}
@@ -290,6 +292,7 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
   <div class="shopbar" id="shopBar" hidden>
     <div class="sbtop"><span id="shopProg">0 of 0 in the trolley</span><button class="btn ghost small" id="exitShop" hidden>Done</button></div>
     <div class="sprog"><i id="shopProgBar"></i></div>
+    <p class="shophint">Tap an item as it goes in your trolley. Press and hold to change its price.</p>
   </div>
 
   <section id="tab-list">
@@ -775,8 +778,8 @@ function itemRow(it,tint){
     if(shopMode){clearTimeout(holdT);holdT=setTimeout(()=>{if(horiz==null){suppressTap=true;holdAt=Date.now();haptic();openEdit()}},550)}},{passive:true});
   rin.addEventListener("touchmove",e=>{if(x0==null)return;const t=e.touches[0];const mx=t.clientX-x0,my=t.clientY-y0;
     if(horiz==null&&(Math.abs(mx)>8||Math.abs(my)>8)){horiz=Math.abs(mx)>Math.abs(my);clearTimeout(holdT);if(horiz)suppressTap=true}
-    if(horiz){dx=mx;const base=openKey===it.key?-88:0;rin.style.transition="none";rin.style.transform=`translateX(${Math.max(-110,Math.min(0,base+dx))}px)`}},{passive:true});
-  rin.addEventListener("touchend",()=>{clearTimeout(holdT);if(x0==null)return;rin.style.transition="";rin.style.transform="";
+    if(horiz){row.classList.add("swiping");dx=mx;const base=openKey===it.key?-88:0;rin.style.transition="none";rin.style.transform=`translateX(${Math.max(-110,Math.min(0,base+dx))}px)`}},{passive:true});
+  rin.addEventListener("touchend",()=>{clearTimeout(holdT);row.classList.remove("swiping");if(x0==null)return;rin.style.transition="";rin.style.transform="";
     if(horiz){const was=openKey===it.key;if(!was&&dx<-50){openKey=it.key;haptic()}else if(was&&dx>30){openKey=null}render()}x0=null},{passive:true});
   if(editingKey===it.key){
     const ed=document.createElement("div"); ed.className="editrow";
