@@ -48,7 +48,12 @@ function compact(p, catName) {
   if (!p || !p.sku || !p.price || typeof p.price.amount !== "number" || p.discontinued) return null;
   const cat = (p.categories && p.categories[0] && p.categories[0].name) || catName || "";
   const sub = (p.categories && p.categories[1] && p.categories[1].name) || "";
-  return { s: p.sku, n: p.name || "", b: p.brandName || "", z: p.sellingSize || "", p: p.price.amount, c: cat, d: sub };
+  const out = { s: p.sku, n: p.name || "", b: p.brandName || "", z: p.sellingSize || "", p: p.price.amount, c: cat, d: sub };
+  // Product photo: keep just the image id and slug; the app rebuilds the Aldi image address
+  const a = Array.isArray(p.assets) && p.assets.find(x => x && typeof x.url === "string");
+  const m = a && a.url.match(/scaleWidth\/\{width\}\/([^/]+)\/\{slug\}/);
+  if (m) out.i = m[1] + "/" + (p.urlSlugText || "product");
+  return out;
 }
 
 // Walk any category tree shape and return the top-level [id, name] pairs
@@ -148,6 +153,7 @@ async function main() {
     if (p) {
       found++;
       const entry = { price: p.p, sku: p.s };
+      if (p.i) entry.image = p.i;
       if (item.match || item.keepDetails) { entry.name = p.n; entry.brand = tidyBrand(p.b); entry.size = p.z; }
       if (!oldPrices.items[item.id] || oldPrices.items[item.id].price !== entry.price) changed++;
       out[item.id] = entry;

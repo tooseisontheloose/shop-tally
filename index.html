@@ -107,6 +107,12 @@ h1{font-family:var(--f-display);font-weight:800;font-size:22px;letter-spacing:-.
 .aisle.trolley h2{color:var(--stop)}
 .ico{width:46px;height:46px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;border:0;padding:0}
 .ico svg{width:32px;height:32px;stroke-width:1.9}
+.ico.photo{background:#FFFFFF;overflow:hidden;padding:3px}
+.ico.photo img{width:100%;height:100%;object-fit:contain;display:block}
+.item.in .ico.photo img{opacity:.55;filter:grayscale(.6)}
+.res .thumb{width:40px;height:40px;flex:none;border-radius:8px;background:#FFFFFF;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;color:var(--accent)}
+.res .thumb img{width:100%;height:100%;object-fit:contain}
+.res .thumb svg{width:24px;height:24px}
 .item.in .ico{background:var(--bg);color:var(--done)}
 .arow{display:grid;grid-template-columns:24px 1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
 .arow:last-child{border-bottom:0}
@@ -463,7 +469,8 @@ function niceSize(name,z){const m=/milk/i.test(name)&&!/milk chocolate|biscuit|e
   if(!m) return z||""; const pt=Math.round(parseFloat(m[1])*1.7598*4)/4; return (pt%1===0?pt:pt.toFixed(2).replace(/0$/,""))+" pints"}
 function rangeAisle(name,c,d){const a=aisleFor(name);if(a!=="Other")return a;return SUB_AISLE[d]||CAT_AISLE[c]||"Other"}
 function titleCase(b){return (b||"").toLowerCase().replace(/(^|[\s(&-])\w/g,x=>x.toUpperCase())}
-function fromRange(r){return {name:niceName(r.n),brand:titleCase(r.b),size:niceSize(r.n,r.z),price:r.p,c:r.c,d:r.d,a:r.a||""}}
+function fromRange(r){return {name:niceName(r.n),brand:titleCase(r.b),size:niceSize(r.n,r.z),price:r.p,c:r.c,d:r.d,a:r.a||"",i:r.i||""}}
+function imgUrl(i,w){return i?`https://dm.emea.cms.aldi.cx/is/image/aldiprodeu/product/jpg/scaleWidth/${w||160}/${i}`:""}
 async function loadRange(){
   try{const r=await fetch("catalogue.json",{cache:"no-cache"});if(!r.ok)return;const j=await r.json();
     RANGE=(j.products||[]).map(x=>({...x,h:norm(niceName(x.n)+" "+x.b+" "+x.z),nn:norm(niceName(x.n)).replace(/\s+/g," ").trim()}));RANGE_BY={};for(const x of RANGE)RANGE_BY[x.s]=x;render();}catch(e){}
@@ -473,7 +480,7 @@ function info(it){
     const m0=(S.itemAisle||{})["s"+it.sku], moved=AISLES.includes(m0)?m0:null;
     const useOwn=own&&(!r||r.p==null||own.t>LIVE.updatedMs);
     const pr=useOwn?own.p:base.price;
-    return {name:base.name,brand:base.brand,size:base.size,price:pr==null?0:pr,needs:pr==null,own:!!useOwn,aisle:moved||(AISLES.includes(base.a)?base.a:rangeAisle(base.name,base.c,base.d))}}
+    return {name:base.name,brand:base.brand,size:base.size,img:base.i||"",price:pr==null?0:pr,needs:pr==null,own:!!useOwn,aisle:moved||(AISLES.includes(base.a)?base.a:rangeAisle(base.name,base.c,base.d))}}
   const k=it.ref||it.cref, m0=(S.itemAisle||{})[k], moved=AISLES.includes(m0)?m0:null, live=LIVE.items[k];
   if(it.ref){const c=CAT_BY_ID[it.ref]; if(!c) return {name:"Item",brand:"",size:"",price:0,aisle:"Other",own:false};
     const base=live&&typeof live.price==="number"?live.price:c.price, own=ownOf(S.myPrices[it.ref]);
@@ -483,7 +490,7 @@ function info(it){
   const hasOwn=c.price!=null, liveOk=live&&typeof live.price==="number";
   const useLive=liveOk&&(!hasOwn||(c.t||0)<LIVE.updatedMs);
   const price=useLive?live.price:(hasOwn?c.price:null);
-  return {name:c.name,brand:useLive?(live.brand||""):"",size:useLive?(live.size||""):"",price:price==null?0:price,needs:price==null,aisle:moved||aisleFor(c.name),own:hasOwn&&!useLive};
+  return {name:c.name,img:liveOk&&live.image?live.image:"",brand:useLive?(live.brand||""):"",size:useLive?(live.size||""):"",price:price==null?0:price,needs:price==null,aisle:moved||aisleFor(c.name),own:hasOwn&&!useLive};
 }
 function priceLabel(d){return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}
 async function loadLive(){
@@ -535,12 +542,13 @@ function render(){
     for(const it of items){ const f=info(it);
       const row=document.createElement("div"); row.className="item"+(it.inTrolley?" in":"");
       row.innerHTML=`<button class="tick" aria-label="${it.inTrolley?"Take out of trolley":"Put in trolley"}"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg></button>
-        <button class="ico" tabindex="-1" aria-hidden="true">${iconFor(f)}</button>
+        <button class="ico${f.img?" photo":""}" tabindex="-1" aria-hidden="true">${f.img?`<img src="${imgUrl(f.img,160)}" alt="" loading="lazy" decoding="async">`:iconFor(f)}</button>
         <button class="name" aria-label="Edit ${esc(f.name)}"><b></b><span></span></button>
         <div class="right"><span class="line">${f.needs?"£ ?":gbp(f.price*it.qty)}</span>
         <div class="qty"><button aria-label="One less">−</button><span>${it.qty}</span><button aria-label="One more">+</button></div></div>`;
       row.querySelector(".name b").textContent=f.name;
       row.querySelector(".name span").innerHTML=f.needs?'Tap to add the shelf price<span class="tag own">add price</span>':esc([f.brand,f.size].filter(Boolean).join(" · "))+(f.own?'<span class="tag own">your price</span>':'');
+      const im=row.querySelector(".ico img"); if(im) im.onerror=()=>{const box=im.parentNode;box.classList.remove("photo");box.innerHTML=iconFor(f)};
       const toggle=()=>{it.inTrolley=!it.inTrolley;if(navigator.vibrate)try{navigator.vibrate(12)}catch(e){};persist();render()};
       row.querySelector(".tick").onclick=toggle; row.querySelector(".ico").onclick=toggle;
       const [minus,plus]=row.querySelectorAll(".qty button");
@@ -601,9 +609,12 @@ const ICONS={
  can:"M6 5a6 2 0 0 0 12 0v14a6 2 0 0 1-12 0z M6 5a6 2 0 0 1 12 0",
  bottle:"M10 3h4v4l2 3v11H8V10l2-3z",
  meat:"M14 4a6 6 0 0 1 2 10l-7 7-3-3 7-7a6 6 0 0 1 1-7z",
- basket:"M3 10h18l-2 10H5z M8 10l4-6 4 6"
+ basket:"M3 10h18l-2 10H5z M8 10l4-6 4 6",
+ banana:"M4 13c3 4 10 4 14-3l2-5 M4 13c0 4 6 7 11 4s6-9 5-12 M18 5l1-2",
+ bag:"M6 8h12l-1 12H7z M9 8V6a3 3 0 0 1 6 0v2",
+ nappy:"M3 7h18v3c-2 0-3 2-3 4v3H6v-3c0-2-1-4-3-4z"
 };
-const ICON_RULES=[["lolly",/lolly|lollies|ice cream/],["fish",/fish|salmon|cod|tuna/],["choc",/chocolate|choc/],["biscuit",/biscuit|cookie|cracker/],["yog",/yog/],
+const ICON_RULES=[["banana",/banana/],["nappy",/napp/],["bag",/crisp|popcorn/],["lolly",/lolly|lollies|ice cream/],["fish",/fish|salmon|cod|tuna/],["choc",/chocolate|choc/],["biscuit",/biscuit|cookie|cracker/],["yog",/yog/],
  ["pasta",/noodle|tagliatelle|pasta|macaroni|spaghetti|penne|fusilli/],["bel",/babybel|mini cheese/],["cheese",/cheese|cheddar|brie|mozzarella|manchego|goat/],["egg",/egg/],
  ["bread",/bread|toast|sourdough|loaf|roll\b|bagel|wrap|naan|pitta/],["roll",/kitchen roll|toilet|tissue/],["potato",/potato/],["corn",/corn/],
  ["cereal",/cereal|granola|craze|oats|porridge|flakes/],["milk",/milk/],["meat",/chicken|beef|mince|lamb|sausage|bacon|turkey|pork|ham/]];
@@ -671,9 +682,10 @@ search.addEventListener("input",()=>{
   }
   for(const x of rhits){ const f=info({sku:x.s});
     const b=document.createElement("button"); b.className="res";
-    b.innerHTML=`<span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;
+    b.innerHTML=`<span class="thumb">${x.i?`<img src="${imgUrl(x.i,120)}" alt="" loading="lazy">`:iconFor(f)}</span><span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;
+    const ti=b.querySelector(".thumb img"); if(ti) ti.onerror=()=>{ti.parentNode.innerHTML=iconFor(f)};
     b.querySelector(".n").innerHTML=esc(f.name)+`<span>${esc([f.brand,f.size].filter(Boolean).join(" · ")||(f.needs?"Add the price in the shop":""))}</span>`;
-    b.onclick=()=>{const r=fromRange(x);dropExample();addItem({sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a}});done(f.name)};
+    b.onclick=()=>{const r=fromRange(x);dropExample();addItem({sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a,i:r.i}});done(f.name)};
     results.appendChild(b);
   }
   for(const [k,c] of customs){
