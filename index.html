@@ -316,7 +316,7 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
 
   <section id="tab-list">
     <div class="add">
-      <label class="searchbox" for="search"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="search" type="search" autocomplete="off" placeholder="Add from Aldi's range" aria-label="Add an item"></label>
+      <label class="searchbox" for="search"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="search" type="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Add from Aldi's range" aria-label="Add an item"></label>
       <div class="results" id="results" hidden></div>
       <div class="addpanel" id="addPanel" hidden></div>
       <form class="custombox" id="customForm" hidden>
@@ -594,7 +594,7 @@ function renderHousehold(){
 async function copyLink(){try{await navigator.clipboard.writeText(joinLink());toast("Link copied")}catch(e){const r=document.createRange();r.selectNodeContents($("#hhLink"));const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Link selected, copy it from here")}}
 
 // ---------- item helpers ----------
-// Live Aldi prices from prices.json (refreshed weekly). A price you typed wins until Aldi's price is newer.
+// Live Aldi prices from prices.json (refreshed weekly). Aldi's price is always used for Aldi items.
 let LIVE={updatedMs:0,items:{}};
 function ownOf(v){if(v==null)return null;return typeof v==="object"?{p:v.p,t:v.t||0}:{p:v,t:0}}
 // Full Aldi range from catalogue.json (refreshed every Friday)
@@ -648,14 +648,12 @@ async function loadRange(){
 function info(it){
   if(it.sku){const r=RANGE_BY[it.sku], base=r?fromRange(r):(it.snap||{name:"Item",brand:"",size:"",price:0}), own=ownOf(S.myPrices["s"+it.sku]);
     const m0=(S.itemAisle||{})["s"+it.sku], moved=AISLES.includes(m0)?m0:null;
-    const useOwn=own&&(!r||r.p==null||own.t>LIVE.updatedMs);
-    const pr=useOwn?own.p:base.price;
-    return {name:base.name,brand:base.brand,size:base.size,img:base.i||"",price:pr==null?0:pr,needs:pr==null,own:!!useOwn,aisle:moved||(AISLES.includes(base.a)?base.a:rangeAisle(base.name,base.c,base.d))}}
+    const pr=base.price; // Aldi's price is the source of truth
+    return {name:base.name,brand:base.brand,size:base.size,img:base.i||"",price:pr==null?0:pr,needs:pr==null,own:false,aisle:moved||(AISLES.includes(base.a)?base.a:rangeAisle(base.name,base.c,base.d))}}
   const k=it.ref||it.cref, m0=(S.itemAisle||{})[k], moved=AISLES.includes(m0)?m0:null, live=LIVE.items[k];
   if(it.ref){const c=CAT_BY_ID[it.ref]; if(!c) return {name:"Item",brand:"",size:"",price:0,aisle:"Other",own:false};
     const base=live&&typeof live.price==="number"?live.price:c.price, own=ownOf(S.myPrices[it.ref]);
-    const useOwn=own&&(!live||own.t>LIVE.updatedMs);
-    return {...c,price:useOwn?own.p:base,own:!!useOwn,aisle:moved||aisleFor(c.name)}}
+    return {...c,price:base,own:false,aisle:moved||aisleFor(c.name)}}
   const c=S.custom[it.cref]||{name:"Item",price:null};
   const hasOwn=c.price!=null, liveOk=live&&typeof live.price==="number";
   const useLive=liveOk&&(!hasOwn||(c.t||0)<LIVE.updatedMs);
@@ -702,7 +700,7 @@ function render(){
   lo.textContent=left>=0?gbp(left):"−"+gbp(-left); lo.classList.toggle("over",left<0);
   $("#budgetBtn .lbl").firstChild.textContent=left>=0?"Left of ":"Over ";
   const nIn=S.list.filter(x=>x.inTrolley).length, nAll=S.list.length;
-  const needTxt=needs?` · ${needs} need${needs===1?"s":""} a price`:"";
+  const needTxt=needs?` · ${needs} without a price`:"";
   if(shopMode){$("#inTrolley").textContent=`${nIn} of ${nAll} in the trolley`+needTxt;$("#listTotal").textContent="List total "+gbp(plan)}
   else{$("#inTrolley").textContent=nAll?`${nAll} item${nAll===1?"":"s"} on your list`+needTxt:"Nothing on the list yet";$("#listTotal").textContent=b?`${Math.round(Math.min(999,plan/b*100))}% of your budget`:""}
   const togo=nAll-nIn;
@@ -783,7 +781,7 @@ function itemRow(it,tint){
   const nb=row.querySelector(".name b");
   if(it.qty>1){const q=document.createElement("span");q.className="q";q.textContent=it.qty+" × ";nb.appendChild(q)}
   nb.appendChild(document.createTextNode(f.name));
-  row.querySelector(".name .nsub").innerHTML=f.needs?'Tap to add the shelf price<span class="tag">add price</span>':esc([f.brand,f.size].filter(Boolean).join(" · "))+(f.own?'<span class="tag">your price</span>':'');
+  row.querySelector(".name .nsub").innerHTML=f.needs?(it.cref?'Tap to add a price<span class="tag">add price</span>':'No price on Aldi\'s site yet'):esc([f.brand,f.size].filter(Boolean).join(" · "))+(f.own?'<span class="tag">your price</span>':'');
   const im=row.querySelector(".ico img"); if(im) im.onerror=()=>{const bx=im.parentNode;bx.classList.remove("photo");bx.innerHTML=iconFor(f)};
   const toggle=()=>{if(openKey){openKey=null;render();return}it.inTrolley=true;haptic();persist();render()};
   row.querySelector(".tick").onclick=()=>{if(!justHeld())toggle()}; row.querySelector(".ico").onclick=()=>{if(!justHeld())toggle()};
@@ -805,19 +803,18 @@ function itemRow(it,tint){
     if(horiz){const was=openKey===it.key;if(!was&&dx<-50){openKey=it.key;haptic()}else if(was&&dx>30){openKey=null}render()}x0=null},{passive:true});
   if(editingKey===it.key){
     const ed=document.createElement("div"); ed.className="editrow";
-    ed.innerHTML=`<label for="price-${it.key}">Shelf price £</label><input class="field" id="price-${it.key}" inputmode="decimal" placeholder="e.g. 1.49" value="${f.needs?"":(f.price/100).toFixed(2)}"><button class="btn small save">Save</button>${f.own&&(it.ref||it.sku)?'<button class="btn ghost small reset">Use Aldi price</button>':''}
+    ed.innerHTML=`${it.cref?`<label for="price-${it.key}">Price £</label><input class="field" id="price-${it.key}" inputmode="decimal" placeholder="e.g. 1.49" value="${f.needs?"":(f.price/100).toFixed(2)}"><button class="btn small save">Save</button>`:""}
       <div class="qty" aria-label="Quantity"><button class="qm" aria-label="One less">−</button><span>${it.qty}</span><button class="qp" aria-label="One more">+</button></div>
       <label for="aisle-${it.key}">Aisle</label><select class="field" id="aisle-${it.key}" style="width:auto;padding:8px 10px">${AISLES.map(a=>`<option${a===f.aisle?" selected":""}>${a}</option>`).join("")}</select>
       <button class="btn ghost small del">Remove</button>`;
     ed.querySelector("select").onchange=e=>{S.itemAisle=S.itemAisle||{};S.itemAisle[it.sku?"s"+it.sku:(it.ref||it.cref)]=e.target.value;editingKey=null;persist();render();toast("Moved to "+e.target.value)};
     const inp=ed.querySelector("input");
-    const save=()=>{const p=parsePounds(inp.value);if(p==null){toast("Enter a price like 1.49");return}
-      if(it.sku)S.myPrices["s"+it.sku]={p,t:Date.now()};else if(it.ref)S.myPrices[it.ref]={p,t:Date.now()};else{S.custom[it.cref].price=p;S.custom[it.cref].t=Date.now()} editingKey=null;persist();render();toast("Price updated")};
+    if(inp){const save=()=>{const p=parsePounds(inp.value);if(p==null){toast("Enter a price like 1.49");return}
+      S.custom[it.cref].price=p;S.custom[it.cref].t=Date.now(); editingKey=null;persist();render();toast("Price updated")};
     ed.querySelector(".save").onclick=save;
-    inp.onkeydown=e=>{if(e.key==="Enter")save()};
+    inp.onkeydown=e=>{if(e.key==="Enter")save()};}
     ed.querySelector(".qm").onclick=()=>{if(it.qty>1){it.qty--;persist();render()}};
     ed.querySelector(".qp").onclick=()=>{it.qty++;persist();render()};
-    const r=ed.querySelector(".reset"); if(r) r.onclick=()=>{delete S.myPrices[it.sku?"s"+it.sku:it.ref];editingKey=null;persist();render()};
     ed.querySelector(".del").onclick=()=>{S.list=S.list.filter(x=>x!==it);editingKey=null;persist();render()};
     row.appendChild(ed);
   }
@@ -930,10 +927,16 @@ function rangeMatches(text){
   return RANGE.map(x=>[x,score(x)]).filter(([,sc])=>sc>=0).sort((a,b)=>b[1]-a[1]||a[0].n.length-b[0].n.length).map(([x])=>x);
 }
 let searchShown=12;
-search.addEventListener("input",()=>{searchShown=12;drawResults()});
+// Phone keyboards "finish" the word when you tap a result, which fires an extra input event.
+// Ignore it if the text hasn't really changed, or if it lands just after picking an item.
+let lastQ="", pickedAt=0;
+search.addEventListener("input",()=>{
+  if(search.value===lastQ && !results.hidden) return;
+  if(!$("#addPanel").hidden && (search.value===lastQ || Date.now()-pickedAt<1000)) return;
+  lastQ=search.value; searchShown=12; drawResults()});
 
 document.addEventListener("pointerdown",e=>{if(e.target.closest(".add")||e.target.closest("#toast"))return;
-  if(!results.hidden||!$("#addPanel").hidden){results.hidden=true;$("#addPanel").hidden=true;search.value="";search.blur()}});
+  if(!results.hidden||!$("#addPanel").hidden){results.hidden=true;$("#addPanel").hidden=true;search.value="";lastQ="";search.blur()}});
 function resultRow(item,img,f,subText){
   const row=document.createElement("div"); row.className="res";
   const on=S.list.find(y=>sameItem(y,item));
@@ -962,7 +965,7 @@ function drawResults(){
   if(all.length){const hd=document.createElement("div");hd.className="rescount";hd.textContent=all.length===1?"1 Aldi product":`${all.length} Aldi products`;results.appendChild(hd)}
   for(const c of hits){const item={ref:c.id},f=info(item);results.appendChild(resultRow(item,"",f,[f.brand,f.size].filter(Boolean).join(" · ")))}
   for(const x of rhits){const r=fromRange(x),item={sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a,i:r.i}},f=info(item);
-    results.appendChild(resultRow(item,x.i,f,[f.brand,f.size].filter(Boolean).join(" · ")||(f.needs?"Add the price in the shop":"")))}
+    results.appendChild(resultRow(item,x.i,f,[f.brand,f.size].filter(Boolean).join(" · ")||(f.needs?"No price on Aldi's site yet":"")))}
   if(all.length>searchShown){const more=document.createElement("button");more.className="res more";
     const n=Math.min(20,all.length-searchShown);
     more.innerHTML=`<span class="n">Show ${n} more</span><span class="p">${all.length-searchShown} left</span>`;
@@ -974,12 +977,12 @@ function drawResults(){
   add.onclick=()=>{results.hidden=true;$("#customForm").hidden=false;$("#customName").value=search.value.trim();$("#customPrice").focus()};
   results.appendChild(add); results.hidden=false;
 }
-function done(name){search.value="";results.hidden=true;$("#addPanel").hidden=true;persist();render();toast("Added "+name)}
+function done(name){search.value="";lastQ="";results.hidden=true;$("#addPanel").hidden=true;persist();render();toast("Added "+name)}
 // Choose how many before adding
 function openAdd(item,img){
   const panel=$("#addPanel"), f=info(item); let q=1;
   const onList=S.list.find(y=>sameItem(y,item));
-  results.hidden=true;
+  pickedAt=Date.now(); lastQ=search.value; results.hidden=true;
   const draw=()=>{
     panel.innerHTML=`<div class="aptop"><span class="thumb">${img?`<img src="${imgUrl(img,160)}" alt="">`:iconFor(f)}</span>
       <div class="n"><b></b><span class="apsub"></span></div>
@@ -988,7 +991,7 @@ function openAdd(item,img){
       <button class="btn yellow apadd">Add ${q>1?q+" ":""}to list${f.needs?"":" · "+gbp(f.price*q)}</button></div>
       ${onList?`<p class="apnote">Already on your list${onList.qty>1?" × "+onList.qty:""}. This adds ${q} more.</p>`:""}`;
     panel.querySelector(".n b").textContent=f.name;
-    panel.querySelector(".apsub").textContent=[f.brand,f.size].filter(Boolean).join(" · ")+(f.needs?(f.brand||f.size?" · ":"")+"price added in the shop":(f.brand||f.size?" · ":"")+gbp(f.price)+" each");
+    panel.querySelector(".apsub").textContent=[f.brand,f.size].filter(Boolean).join(" · ")+(f.needs?(f.brand||f.size?" · ":"")+"no price on Aldi's site yet":(f.brand||f.size?" · ":"")+gbp(f.price)+" each");
     const im=panel.querySelector(".thumb img"); if(im) im.onerror=()=>{im.parentNode.innerHTML=iconFor(f)};
     panel.querySelector(".qm").onclick=()=>{if(q>1){q--;draw()}};
     panel.querySelector(".qp").onclick=()=>{q++;draw()};
@@ -1104,7 +1107,7 @@ function renderStaples(){
       c.querySelector(".additems").onclick=()=>{editingSaved=idx;render();setTimeout(()=>{const i=document.getElementById("se-search");if(i)i.focus()},50)};
       a.appendChild(c); return;
     }
-    c.innerHTML=`<h3></h3><p>${L.items.length} item${L.items.length===1?"":"s"} · about <span class="mono">${gbp(tot)}</span> at today's prices${miss?` · ${miss} still need a price`:""}</p><div class="chips"></div><label class="autorow"><input type="checkbox" class="autochk" id="auto-${idx}"${L.auto?" checked":""}><span><b>Add to every new list</b><span>Goes on automatically each time you finish a shop</span></span></label><div class="row"><button class="btn small add">Add to this week</button><button class="btn ghost small edit">Edit list</button><button class="btn ghost small del">Delete</button></div>`;
+    c.innerHTML=`<h3></h3><p>${L.items.length} item${L.items.length===1?"":"s"} · about <span class="mono">${gbp(tot)}</span> at today's prices${miss?` · ${miss} without a price`:""}</p><div class="chips"></div><label class="autorow"><input type="checkbox" class="autochk" id="auto-${idx}"${L.auto?" checked":""}><span><b>Add to every new list</b><span>Goes on automatically each time you finish a shop</span></span></label><div class="row"><button class="btn small add">Add to this week</button><button class="btn ghost small edit">Edit list</button><button class="btn ghost small del">Delete</button></div>`;
     c.querySelector("h3").textContent=L.name;
     c.querySelector(".autochk").onchange=e=>{L.auto=e.target.checked;persist();toast(L.auto?L.name+" will be added to every new list":L.name+" won't be added automatically")};
     const ch=c.querySelector(".chips");
