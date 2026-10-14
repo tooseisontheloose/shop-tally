@@ -902,8 +902,9 @@ function rangeMatches(text){
 }
 let searchShown=12;
 search.addEventListener("input",()=>{searchShown=12;drawResults()});
-search.addEventListener("focus",()=>{if(search.value.trim()&&results.hidden&&$("#addPanel").hidden)drawResults()});
-document.addEventListener("pointerdown",e=>{if(!e.target.closest(".add")&&!e.target.closest("#toast")){results.hidden=true;$("#addPanel").hidden=true}});
+
+document.addEventListener("pointerdown",e=>{if(e.target.closest(".add")||e.target.closest("#toast"))return;
+  if(!results.hidden||!$("#addPanel").hidden){results.hidden=true;$("#addPanel").hidden=true;search.value="";search.blur()}});
 function resultRow(item,img,f,subText){
   const row=document.createElement("div"); row.className="res";
   const on=S.list.find(y=>sameItem(y,item));
@@ -914,9 +915,7 @@ function resultRow(item,img,f,subText){
   row.querySelector(".resmain").onclick=()=>openAdd(item,img);
   row.querySelector(".plus").onclick=()=>{
     const before=S.list.find(y=>sameItem(y,item)); const was=before?before.qty:0;
-    dropExample(); addItem({...item,qty:1}); haptic();
-    search.value=""; results.hidden=true; $("#addPanel").hidden=true; search.blur();
-    persist(); render();
+    dropExample(); addItem({...item,qty:1}); haptic(); persist(); render(); drawResults();
     toast((was?"Now "+(was+1)+" × ":"Added ")+f.name,()=>{const x=S.list.find(y=>sameItem(y,item));if(!x)return;
       if(x.qty>1)x.qty--;else S.list=S.list.filter(y=>y!==x);persist();render();if(!results.hidden)drawResults()})};
   return row;
