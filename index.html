@@ -111,6 +111,21 @@ button{cursor:pointer}
 .res .thumb{width:44px;height:44px;flex:none;border-radius:12px;background:#FFFFFF;display:grid;place-items:center;overflow:hidden;color:#5B6A63}
 .res .thumb img{width:100%;height:100%;object-fit:contain}
 .res .thumb svg{width:26px;height:26px}
+.addpanel{margin-top:8px;background:var(--surface);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 24px var(--shadow)}
+.aptop{display:flex;gap:12px;align-items:center}
+.aptop .thumb{width:58px;height:58px;flex:none;border-radius:14px;background:#FFFFFF;display:grid;place-items:center;overflow:hidden;color:#5B6A63}
+.aptop .thumb img{width:100%;height:100%;object-fit:contain}
+.aptop .thumb svg{width:30px;height:30px}
+.aptop .n{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.aptop .n b{font-size:18px;font-weight:800}
+.apsub{font-size:13.5px;color:var(--muted);font-weight:600}
+.apx{border:0;background:var(--bg);width:36px;height:36px;border-radius:50%;font-size:22px;line-height:1;color:var(--muted);flex:none}
+.aprow{display:flex;gap:10px;align-items:center}
+.qty.big button{width:46px;height:46px;font-size:22px}
+.qty.big span{min-width:28px;font-size:19px}
+.qty button:disabled{opacity:.35}
+.aprow .apadd{flex:1}
+.apnote{margin:0;font-size:13.5px;color:var(--muted);font-weight:600}
 .custombox{display:grid;grid-template-columns:1fr 100px;gap:8px;margin-top:8px}
 .custombox .row{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end}
 
@@ -133,7 +148,7 @@ button{cursor:pointer}
 .name{flex:1;min-width:0;border:0;background:none;text-align:left;padding:0;display:flex;flex-direction:column;gap:2px}
 .name b{font-size:17px;font-weight:800;line-height:1.25;overflow-wrap:anywhere}
 .name b .q{color:var(--accent)}
-.name span{font-size:13.5px;font-weight:600;color:var(--muted)}
+.name .nsub{font-size:13.5px;font-weight:600;color:var(--muted)}
 .line{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 .tick{width:36px;height:36px;flex:none;border-radius:50%;border:2.5px solid var(--line);background:var(--surface);padding:0;display:grid;place-items:center}
 .tick svg{opacity:0;width:18px;height:18px}
@@ -159,7 +174,7 @@ button{cursor:pointer}
 .zig{display:block;width:100%;height:10px;color:var(--surface)}
 
 /* Shop mode */
-body.shop .add, body.shop #hhBanner, body.shop nav.tabs{display:none}
+body.shop .add, body.shop #addPanel, body.shop #hhBanner, body.shop nav.tabs{display:none}
 body.shop .rowin{min-height:86px;padding:12px 14px}
 body.shop .ico{width:62px;height:62px}
 body.shop .name b{font-size:19px}
@@ -178,6 +193,14 @@ body.shop .wrap{padding-block-end:40px}
 .card p{margin:4px 0 10px;color:var(--muted);font-size:14px;font-weight:600}
 .card .row{display:flex;gap:8px;flex-wrap:wrap}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+.autorow{display:flex;gap:12px;align-items:center;background:var(--accent-soft);border-radius:14px;padding:12px 14px;margin:0 0 12px;cursor:pointer}
+.autorow input{appearance:none;width:50px;height:30px;border-radius:999px;background:var(--line);position:relative;flex:none;margin:0;cursor:pointer}
+.autorow input::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.autorow input:checked{background:var(--accent)}
+.autorow input:checked::after{left:23px}
+@media (prefers-reduced-motion:no-preference){.autorow input,.autorow input::after{transition:all .2s}}
+.autorow>span{display:flex;flex-direction:column;gap:1px;font-size:15px}
+.autorow>span span{font-size:13px;color:var(--muted);font-weight:600}
 .chip{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--bg)}
 h2.sect{font-weight:800;font-size:24px;margin:26px 0 0}
 .page-top{padding-top:18px}
@@ -242,6 +265,7 @@ nav.tabs button[aria-selected="true"]{color:var(--yellow)}
     <div class="add">
       <label class="searchbox" for="search"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="search" type="search" autocomplete="off" placeholder="Add from Aldi's range" aria-label="Add an item"></label>
       <div class="results" id="results" hidden></div>
+      <div class="addpanel" id="addPanel" hidden></div>
       <form class="custombox" id="customForm" hidden>
         <input class="field" id="customName" placeholder="Item name" aria-label="Item name">
         <input class="field mono" id="customPrice" inputmode="decimal" placeholder="£ price" aria-label="Shelf price in pounds">
@@ -382,9 +406,10 @@ const BRING_LIST = {name:"Weekly staples",items:[
  {cref:"cb5",qty:1},{cref:"cb6",qty:1},{cref:"cb7",qty:1},{cref:"cb8",qty:1},{ref:"a0",qty:1},
  {ref:"a24",qty:1},{cref:"cb9",qty:1},{cref:"cb10",qty:1},{cref:"cb11",qty:1},{cref:"cb12",qty:1}]};
 function addBring(st){
+  for(const L of st.saved||[]) if(L.auto===undefined) L.auto=(L.name==="Weekly staples");
   if(st.bringAdded) return st;
   for(const [k,v] of Object.entries(BRING_CUSTOM)) if(!st.custom[k]) st.custom[k]={...v};
-  st.saved.unshift(JSON.parse(JSON.stringify(BRING_LIST)));
+  st.saved.unshift({...JSON.parse(JSON.stringify(BRING_LIST)),auto:true});
   st.bringAdded=true; return st;
 }
 function exampleState(){
@@ -532,6 +557,13 @@ function addItem(item){
   const same=S.list.find(x=>(item.ref&&x.ref===item.ref)||(item.cref&&x.cref===item.cref)||(item.sku&&x.sku===item.sku));
   if(same){same.qty+=item.qty||1}else S.list.push({key:uid(),qty:item.qty||1,inTrolley:false,...item});
 }
+function sameItem(a,b){return (a.sku&&a.sku===b.sku)||(a.ref&&a.ref===b.ref)||(a.cref&&a.cref===b.cref)}
+function addAutoLists(){let n=0;const names=[];
+  for(const L of S.saved||[]){if(!L.auto)continue;let added=false;
+    for(const it of L.items){const x={ref:it.ref||undefined,cref:it.cref||undefined,sku:it.sku||undefined,snap:it.snap||undefined,qty:it.qty};
+      if(!S.list.some(y=>sameItem(y,x))){addItem(x);n++;added=true}}
+    if(added)names.push(L.name)}
+  return {n,names}}
 function dropExample(){if(S.example){S.list=[];S.example=false}}
 
 // ---------- render ----------
@@ -621,14 +653,14 @@ function itemRow(it,tint){
   row.innerHTML=`<button class="under" tabindex="-1">Delete</button>
     <div class="rowin">
       <button class="ico${f.img?" photo":""}" style="--tint:${tint}" tabindex="-1" aria-hidden="true">${f.img?`<img src="${imgUrl(f.img,160)}" alt="" loading="lazy" decoding="async">`:iconFor(f)}</button>
-      <button class="name" aria-label="Edit ${esc(f.name)}"><b></b><span></span></button>
+      <button class="name" aria-label="Edit ${esc(f.name)}"><b></b><span class="nsub"></span></button>
       <span class="line">${f.needs?"£ ?":gbp(f.price*it.qty)}</span>
       <button class="tick" aria-label="Put ${esc(f.name)} in the trolley">${TICK_SVG}</button>
     </div>`;
   const nb=row.querySelector(".name b");
   if(it.qty>1){const q=document.createElement("span");q.className="q";q.textContent=it.qty+" × ";nb.appendChild(q)}
   nb.appendChild(document.createTextNode(f.name));
-  row.querySelector(".name span").innerHTML=f.needs?'Tap to add the shelf price<span class="tag">add price</span>':esc([f.brand,f.size].filter(Boolean).join(" · "))+(f.own?'<span class="tag">your price</span>':'');
+  row.querySelector(".name .nsub").innerHTML=f.needs?'Tap to add the shelf price<span class="tag">add price</span>':esc([f.brand,f.size].filter(Boolean).join(" · "))+(f.own?'<span class="tag">your price</span>':'');
   const im=row.querySelector(".ico img"); if(im) im.onerror=()=>{const bx=im.parentNode;bx.classList.remove("photo");bx.innerHTML=iconFor(f)};
   const toggle=()=>{if(openKey){openKey=null;render();return}it.inTrolley=true;haptic();persist();render()};
   row.querySelector(".tick").onclick=toggle; row.querySelector(".ico").onclick=toggle;
@@ -721,16 +753,17 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;","
 function showConfirm(kind){
   const c=$("#confirmArea"); const {plan,cart}=totals();
   const msg= kind==="finish"
-    ? `Log this shop at <b class="mono">${gbp(cart||plan)}</b> and clear the list? Items you didn't tick stay on for next time.`
+    ? `Log this shop at <b class="mono">${gbp(cart||plan)}</b> and start a new list? Items you didn't tick stay on${(S.saved||[]).some(L=>L.auto)?", and "+S.saved.filter(L=>L.auto).map(L=>esc(L.name)).join(" and ")+" will be added again":""}.`
     : "Remove everything from this week's list? Saved lists aren't affected.";
-  c.innerHTML=`<div class="confirm"><div>${msg}</div><div class="row"><button class="btn small" id="cYes">${kind==="finish"?"Finish shop":"Clear list"}</button><button class="btn ghost small" id="cNo">Cancel</button></div></div>`;
+  c.innerHTML=`<div class="confirm"><div>${msg}</div><div class="row"><button class="btn small" id="cYes">${kind==="finish"?"Finish and start new list":"Clear list"}</button><button class="btn ghost small" id="cNo">Cancel</button></div></div>`;
   $("#cNo").onclick=()=>c.innerHTML="";
   $("#cYes").onclick=()=>{
     if(kind==="finish"){
       const spent=cart||plan; const wasExample=S.example;
       if(!wasExample){S.history.unshift({date:new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short"}),spent,budget:S.budget});S.history=S.history.slice(0,12)}
       S.list=S.list.filter(x=>!x.inTrolley).map(x=>({...x})); S.example=false; if(shopMode) setShop(false);
-      toast(wasExample?"Example cleared":"Shop logged: "+gbp(spent));
+      const r=addAutoLists();
+      toast("Shop logged: "+gbp(spent)+(r.n?" · new list started with "+r.names.join(" and "):""));
     } else {S.list=[];S.example=false;toast("List cleared")}
     c.innerHTML="";persist();render();
   };
@@ -739,6 +772,7 @@ function showConfirm(kind){
 // ---------- search / add ----------
 const search=$("#search"), results=$("#results");
 search.addEventListener("input",()=>{
+  $("#addPanel").hidden=true;
   const q=norm(search.value).trim();
   if(!q){results.hidden=true;return}
   const words=q.split(/\s+/);
@@ -751,7 +785,7 @@ search.addEventListener("input",()=>{
     const b=document.createElement("button"); b.className="res";
     b.innerHTML=`<span class="n"></span><span class="p">${gbp(own!=null?own:c.price)}</span>`;
     b.querySelector(".n").innerHTML=esc(c.name)+`<span>${esc([c.brand,c.size].filter(Boolean).join(" · "))}</span>`;
-    b.onclick=()=>{dropExample();addItem({ref:c.id});done(c.name)};
+    b.onclick=()=>openAdd({ref:c.id});
     results.appendChild(b);
   }
   for(const x of rhits){ const f=info({sku:x.s});
@@ -759,14 +793,14 @@ search.addEventListener("input",()=>{
     b.innerHTML=`<span class="thumb">${x.i?`<img src="${imgUrl(x.i,120)}" alt="" loading="lazy">`:iconFor(f)}</span><span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;
     const ti=b.querySelector(".thumb img"); if(ti) ti.onerror=()=>{ti.parentNode.innerHTML=iconFor(f)};
     b.querySelector(".n").innerHTML=esc(f.name)+`<span>${esc([f.brand,f.size].filter(Boolean).join(" · ")||(f.needs?"Add the price in the shop":""))}</span>`;
-    b.onclick=()=>{const r=fromRange(x);dropExample();addItem({sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a,i:r.i}});done(f.name)};
+    b.onclick=()=>{const r=fromRange(x);openAdd({sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a,i:r.i}},x.i)};
     results.appendChild(b);
   }
   for(const [k,c] of customs){
     const b=document.createElement("button"); b.className="res";
     {const f=info({cref:k});b.innerHTML=`<span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;}
     b.querySelector(".n").innerHTML=esc(c.name)+'<span>Your item</span>';
-    b.onclick=()=>{dropExample();addItem({cref:k});done(c.name)};
+    b.onclick=()=>openAdd({cref:k});
     results.appendChild(b);
   }
   const add=document.createElement("button"); add.className="res custom";
@@ -774,14 +808,36 @@ search.addEventListener("input",()=>{
   add.onclick=()=>{results.hidden=true;$("#customForm").hidden=false;$("#customName").value=search.value.trim();$("#customPrice").focus()};
   results.appendChild(add); results.hidden=false;
 });
-function done(name){search.value="";results.hidden=true;persist();render();toast("Added "+name)}
+function done(name){search.value="";results.hidden=true;$("#addPanel").hidden=true;persist();render();toast("Added "+name)}
+// Choose how many before adding
+function openAdd(item,img){
+  const panel=$("#addPanel"), f=info(item); let q=1;
+  const onList=S.list.find(y=>sameItem(y,item));
+  results.hidden=true;
+  const draw=()=>{
+    panel.innerHTML=`<div class="aptop"><span class="thumb">${img?`<img src="${imgUrl(img,160)}" alt="">`:iconFor(f)}</span>
+      <div class="n"><b></b><span class="apsub"></span></div>
+      <button class="apx" aria-label="Close">×</button></div>
+      <div class="aprow"><div class="qty big" aria-label="How many"><button class="qm" aria-label="One less"${q<=1?" disabled":""}>−</button><span aria-live="polite">${q}</span><button class="qp" aria-label="One more">+</button></div>
+      <button class="btn yellow apadd">Add ${q>1?q+" ":""}to list${f.needs?"":" · "+gbp(f.price*q)}</button></div>
+      ${onList?`<p class="apnote">Already on your list${onList.qty>1?" × "+onList.qty:""}. This adds ${q} more.</p>`:""}`;
+    panel.querySelector(".n b").textContent=f.name;
+    panel.querySelector(".apsub").textContent=[f.brand,f.size].filter(Boolean).join(" · ")+(f.needs?(f.brand||f.size?" · ":"")+"price added in the shop":(f.brand||f.size?" · ":"")+gbp(f.price)+" each");
+    const im=panel.querySelector(".thumb img"); if(im) im.onerror=()=>{im.parentNode.innerHTML=iconFor(f)};
+    panel.querySelector(".qm").onclick=()=>{if(q>1){q--;draw()}};
+    panel.querySelector(".qp").onclick=()=>{q++;draw()};
+    panel.querySelector(".apx").onclick=()=>{panel.hidden=true;results.hidden=!search.value.trim()};
+    panel.querySelector(".apadd").onclick=()=>{dropExample();addItem({...item,qty:q});done((q>1?q+" × ":"")+f.name)};
+  };
+  draw(); panel.hidden=false; panel.querySelector(".apadd").focus({preventScroll:true});
+}
 $("#customCancel").onclick=()=>{$("#customForm").hidden=true};
 $("#customForm").addEventListener("submit",e=>{e.preventDefault();
   const name=$("#customName").value.trim(), p=parsePounds($("#customPrice").value);
   if(!name){toast("Give the item a name");return} if(p==null){toast("Enter the shelf price, like 1.49");return}
   let k=Object.keys(S.custom).find(k=>S.custom[k].name.toLowerCase()===name.toLowerCase());
   if(k){S.custom[k].price=p;S.custom[k].t=Date.now()} else {k="c"+uid();S.custom[k]={name,price:p,t:Date.now(),aisle:guessAisle(name)}}
-  dropExample();addItem({cref:k});$("#customForm").hidden=true;$("#customPrice").value="";done(name);
+  $("#customForm").hidden=true;$("#customPrice").value="";openAdd({cref:k});
 });
 function guessAisle(n){n=n.toLowerCase();
   const m=[["Fruit & Veg",/banana|apple|orange|grape|berr|potato|onion|carrot|tomato|lettuce|cucumber|pepper|broccoli|salad|lemon|avocado|mushroom|garlic|veg|fruit|melon|pear|spinach|courgette/],
@@ -806,8 +862,9 @@ function renderStaples(){
     const tot=L.items.reduce((s,it)=>s+info(it).price*it.qty,0);
     const miss=L.items.filter(it=>info(it).needs).length;
     const c=document.createElement("div"); c.className="card";
-    c.innerHTML=`<h3></h3><p>${L.items.length} items · about <span class="mono">${gbp(tot)}</span> at today's prices${miss?` · ${miss} still need a price`:""}</p><div class="chips"></div><div class="row"><button class="btn small add">Add to this week</button><button class="btn ghost small upd">Replace with current list</button><button class="btn ghost small del">Delete</button></div>`;
+    c.innerHTML=`<h3></h3><p>${L.items.length} items · about <span class="mono">${gbp(tot)}</span> at today's prices${miss?` · ${miss} still need a price`:""}</p><div class="chips"></div><label class="autorow"><input type="checkbox" class="autochk" id="auto-${idx}"${L.auto?" checked":""}><span><b>Add to every new list</b><span>Goes on automatically each time you finish a shop</span></span></label><div class="row"><button class="btn small add">Add to this week</button><button class="btn ghost small upd">Replace with current list</button><button class="btn ghost small del">Delete</button></div>`;
     c.querySelector("h3").textContent=L.name;
+    c.querySelector(".autochk").onchange=e=>{L.auto=e.target.checked;persist();toast(L.auto?L.name+" will be added to every new list":L.name+" won't be added automatically")};
     const ch=c.querySelector(".chips");
     for(const it of L.items){const s=document.createElement("span");s.className="chip";s.textContent=(it.qty>1?it.qty+"× ":"")+info(it).name;ch.appendChild(s)}
     c.querySelector(".add").onclick=()=>{dropExample();for(const it of L.items)addItem({ref:it.ref||undefined,cref:it.cref||undefined,sku:it.sku||undefined,snap:it.snap||undefined,qty:it.qty});persist();render();switchTab("list");toast("Added "+L.name)};

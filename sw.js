@@ -1,5 +1,5 @@
 // Keeps the app working with no signal in the shop.
-const CACHE = "shop-tally-v3";
+const CACHE = "shop-tally-v4";
 const SHELL = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
@@ -18,7 +18,7 @@ self.addEventListener("fetch", e => {
   if (url.origin === location.origin) {
     // Network first, so updates arrive; cached copy when offline
     e.respondWith(
-      fetch(e.request)
+      fetch(e.request, { cache: "no-cache" })
         .then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return res; })
         .catch(() => caches.match(e.request).then(r => r || caches.match("./index.html")))
     );
