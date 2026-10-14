@@ -1,199 +1,161 @@
 {
- "updated": "2026-10-14T12:34:58.737Z",
+ "updated": "2026-10-14T12:00:08.424Z",
  "source": "aldi.co.uk catalogue",
  "items": {
   "a0": {
    "price": 165,
-   "sku": "000000000000416770",
-   "image": "c8b92940-471c-4eff-934e-2776c1b922fb/cowbelle-semi-skimmed-milk-1-7-fat"
+   "sku": "000000000000416770"
   },
   "a1": {
    "price": 240,
-   "sku": "000000000000416713",
-   "image": "fa1bf699-a7a0-40fe-9362-1ce0e46f7434/cowbelle-semi-skimmed-milk-1-7-fat"
+   "sku": "000000000000416713"
   },
   "a2": {
    "price": 165,
-   "sku": "000000000000416772",
-   "image": "cf896a43-3b9a-4396-97d3-86ffba627c76/cowbelle-whole-milk-3-6-fat"
+   "sku": "000000000000416772"
   },
   "a3": {
    "price": 165,
-   "sku": "000000000000416864",
-   "image": "0fdfa0f4-3845-46af-94f6-9dc8bf11d285/cowbelle-skimmed-milk-0-5-fat"
+   "sku": "000000000000416864"
   },
   "a4": {
    "price": 169,
-   "sku": "000000000000417584",
-   "image": "fb259109-9f17-403f-83f8-15a183c4cba5/cowbelle-filtered-british-semi-skimmed-milk"
+   "sku": "000000000000417584"
   },
   "a5": {
    "price": 169,
-   "sku": "000000000000423400",
-   "image": "2b00d045-24dd-4612-b27e-4ff72888ac4a/cowbelle-filtered-british-whole-milk"
+   "sku": "000000000000423400"
   },
   "a6": {
    "price": 209,
-   "sku": "000000000000423466",
-   "image": "126b843a-42b1-4eff-bb02-704aa64bf8f7/cowbelle-organic-semi-skimmed-milk-1-7-fat"
+   "sku": "000000000000423466"
   },
   "a7": {
    "price": 99,
-   "sku": "000000000000422329",
-   "image": "5dc3c25a-94e0-4447-8696-6a7c174f3757/cowbelle-lactose-free-milk"
+   "sku": "000000000000422329"
   },
   "a8": {
    "price": 95,
-   "sku": "000000000000543221",
-   "image": "ae7ef580-7dba-4552-aa82-4c12b37db36e/cowbelle-chocolate-milk"
+   "sku": "000000000000543221"
   },
   "a9": {
    "price": 95,
-   "sku": "000000000755310001",
-   "image": "b8bde2b0-32a8-4ba0-aa31-9a281625cc28/cowbelle-strawberry-flavoured-milk"
+   "sku": "000000000755310001"
   },
   "a10": {
    "price": 55,
-   "sku": "000000000418246001",
-   "image": "4d2130c5-c629-4051-8e2f-46cfdbfb52a4/cowbelle-strawberry-extra-thick-milkshake"
+   "sku": "000000000418246001"
   },
   "a11": {
    "price": 65,
-   "sku": "000000000000534181",
-   "image": "e33e4d8f-4e38-4223-b7ee-a8a6f539d740/everyday-essentials-semi-skimmed-uht-milk"
+   "sku": "000000000000534181"
   },
   "a12": {
    "price": 65,
-   "sku": "000000000000534177",
-   "image": "6f4fc30b-72c1-4160-b1b1-5d812006cb5d/everyday-essentials-skimmed-uht-milk"
+   "sku": "000000000000534177"
   },
   "a13": {
    "price": 99,
-   "sku": "000000000000548465",
-   "image": "7da0a56d-ac26-4370-8505-05d22a4c4ffc/merevale-free-range-eggs-6-pack"
+   "sku": "000000000000548465"
   },
   "a14": {
    "price": 149,
-   "sku": "000000000000416701",
-   "image": "5a12d16b-7c31-4f4a-be67-fcc7a0caeb0c/merevale-british-medium-free-range-eggs-6-pack"
+   "sku": "000000000000416701"
   },
   "a15": {
    "price": 169,
-   "sku": "000000000000416688",
-   "image": "d3363773-e6f5-4cf2-85f9-40baa5784f92/merevale-british-large-free-range-eggs-6-pack"
+   "sku": "000000000000416688"
   },
   "a16": {
    "price": 189,
-   "sku": "000000000000417638",
-   "image": "c53244c7-ab00-4b40-92ca-c88931d2a923/merevale-british-very-large-free-range-eggs-6-pack"
+   "sku": "000000000000417638"
   },
   "a17": {
    "price": 249,
-   "sku": "000000000000417633",
-   "image": "1f1e9423-aa43-4c8d-a4db-31edfcd21778/merevale-british-medium-free-range-eggs-12-pack"
+   "sku": "000000000000417633"
   },
   "a18": {
    "price": 289
   },
   "a19": {
    "price": 285,
-   "sku": "000000000000417635",
-   "image": "25d6d05e-8b84-4eab-b804-87bdf37465a8/merevale-british-free-range-mixed-weight-eggs-15-pack"
+   "sku": "000000000000417635"
   },
   "a20": {
    "price": 225,
-   "sku": "000000000000417565",
-   "image": "a58743cc-b2f4-4a5b-bb01-d8e6742af127/merevale-british-organic-eggs-6-pack"
+   "sku": "000000000000417565"
   },
   "a21": {
    "price": 199,
-   "sku": "000000000416427001",
-   "image": "57a972e6-293c-4643-83ff-9dd1d16b919b/specially-selected-british-free-range-golden-yolk-eggs-6-pack"
+   "sku": "000000000416427001"
   },
   "a22": {
    "price": 285,
-   "sku": "000000000417607001",
-   "image": "56d94fd1-28ed-4179-8708-b026d67fdc60/everyday-essentials-grated-cheddar-cheese"
+   "sku": "000000000417607001"
   },
   "a23": {
    "price": 285,
-   "sku": "000000000417607002",
-   "image": "ac4b7622-1a8a-433c-bf7a-0da9505c50aa/everyday-essentials-grated-mozzarella-cheese"
+   "sku": "000000000417607002"
   },
   "a24": {
    "price": 99,
-   "sku": "000000000000696215",
-   "image": "05ddc39b-0137-4488-bb7c-2a5197764161/dairly-cottage-cheese"
+   "sku": "000000000000696215"
   },
   "a25": {
    "price": 149,
-   "sku": "000000000549702002",
-   "image": "b732cec3-7031-4e1d-b171-2e92643c6389/emporium-classic-grilling-cheese"
+   "sku": "000000000549702002"
   },
   "a26": {
    "price": 299,
-   "sku": "000000000282692002",
-   "image": "67c3b9ef-4cd7-4317-a518-d6874dc1026f/specially-selected-manchego-cheese-d-o-p"
+   "sku": "000000000282692002"
   },
   "a27": {
    "price": 169,
-   "sku": "000000000584602001",
-   "image": "660c2779-1b3a-4731-b144-a485b2c4d317/emporium-somerset-brie-cheese"
+   "sku": "000000000584602001"
   },
   "a28": {
    "price": 199,
-   "sku": "000000000422367001",
-   "image": "e964996e-8e25-4c61-8717-c4ed35f5718e/emporium-french-goats-cheese"
+   "sku": "000000000422367001"
   },
   "a29": {
    "price": 109,
-   "sku": "000000000418129002",
-   "image": "94fa6ac7-2a12-4f95-86f1-eb7055213d7e/emporium-mild-cheese-spread"
+   "sku": "000000000418129002"
   },
   "a30": {
    "price": 49,
-   "sku": "000000000670216001",
-   "image": "c7b80518-ff87-46a5-9b08-2cbd0caafa38/emporium-squeezy-cheese"
+   "sku": "000000000670216001"
   },
   "a31": {
    "price": 109,
-   "sku": "000000000000339840",
-   "image": "dc20934c-8c20-43e2-af74-ef4ee83cbe4c/ready-set-cook-egg-noodles"
+   "sku": "000000000000339840"
   },
   "a32": {
    "price": 139,
-   "sku": "000000000000476098",
-   "image": "967e2f79-2ee8-4530-8cc8-9da499c32a3c/specially-selected-egg-tagliatelle"
+   "sku": "000000000000476098"
   },
   "a33": {
    "price": 52,
-   "sku": "000000000000335591",
-   "image": "b37d6374-3e77-47e7-b1ee-373dab35162f/dessert-menu-evaporated-milk"
+   "sku": "000000000000335591"
   },
   "a34": {
    "price": 89,
-   "sku": "000000000000307869",
-   "image": "521be233-acfa-4008-9bce-4f826e472dcd/harvest-morn-craze-milk-chocolate"
+   "sku": "000000000000307869"
   },
   "a35": {
    "price": 129,
-   "sku": "000000000000467832",
-   "image": "5bbdd2b1-f87e-4c8b-aa8b-d27407c5224d/belmont-milk-chocolate-malted-milk-biscuits"
+   "sku": "000000000000467832"
   },
   "a36": {
    "price": 175,
-   "sku": "000000000307934001",
-   "image": "63820525-b157-4bee-8272-8e2391e0c0ca/dairyfine-milk-chocolate"
+   "sku": "000000000307934001"
   },
   "a37": {
    "price": 199,
-   "sku": "000000000462502003",
-   "image": "218edc4a-fa45-48e4-afdd-b062d2b853ce/moser-roth-milk-chocolate"
+   "sku": "000000000462502003"
   },
   "cb1": {
    "price": 119,
    "sku": "000000000423413011",
-   "image": "9aadbf13-b822-46f3-b9fc-ccf04e311dff/brooklea-coconut-greek-style-yogurt",
    "name": "Coconut Greek Style Yogurt",
    "brand": "Brooklea",
    "size": ""
@@ -201,7 +163,6 @@
   "cb2": {
    "price": 99,
    "sku": "000000000282227001",
-   "image": "58fc1778-f391-49b2-a544-958a8adcc426/emporium-cheese-slices-8-pack",
    "name": "Cheese Slices 8 Pack",
    "brand": "Emporium",
    "size": ""
@@ -209,7 +170,6 @@
   "cb3": {
    "price": 75,
    "sku": "000000000000382252",
-   "image": "04fc96cd-3fc4-471e-8462-997591c906b5/village-bakery-white-toastie-sliced-loaf",
    "name": "White Toastie Sliced Loaf",
    "brand": "Village Bakery",
    "size": "800 g"
@@ -217,7 +177,6 @@
   "cb4": {
    "price": 189,
    "sku": "000000000386637001",
-   "image": "3fa00468-346b-4947-941e-29cf17b4dcd7/specially-selected-white-sourdough-sliced-loaf",
    "name": "White Sourdough Sliced Loaf",
    "brand": "Specially Selected",
    "size": "500 g"
@@ -225,7 +184,6 @@
   "cb5": {
    "price": 139,
    "sku": "000000000000634326",
-   "image": "76ded37f-59ff-4c72-a12c-3d821feacda5/gianni-s-rocket-lollies-8-pack",
    "name": "Rocket Lollies 8 Pack",
    "brand": "Gianni's",
    "size": "464 ml"
@@ -233,7 +191,6 @@
   "cb6": {
    "price": 80,
    "sku": "000000000000473275",
-   "image": "1a4a120d-4c87-4a79-911e-59ae600b0462/everyday-essentials-fish-fingers-10-pack",
    "name": "Fish Fingers 10 Pack",
    "brand": "Everyday Essentials",
    "size": "250 g"
@@ -241,7 +198,6 @@
   "cb7": {
    "price": 115,
    "sku": "000000000000648594",
-   "image": "af9ceeed-90a3-4804-82ce-d3af68b8d002/everyday-essentials-jumbo-kitchen-towel",
    "name": "Jumbo Kitchen Towel",
    "brand": "Everyday Essentials",
    "size": "240 Sheets"
@@ -249,7 +205,6 @@
   "cb8": {
    "price": 289,
    "sku": "000000000622124001",
-   "image": "3557e017-30bf-41f3-bcc4-143b78306506/babybel-original-mini-babybels-10-pack",
    "name": "Original Mini Babybels 10 Pack",
    "brand": "Babybel",
    "size": "200 g"
@@ -257,7 +212,6 @@
   "cb9": {
    "price": 55,
    "sku": "000000000000274512",
-   "image": "ce5cdc3c-0b01-4841-9815-c5896067d635/four-seasons-supersweet-sweetcorn-in-water",
    "name": "Supersweet Sweetcorn in Water",
    "brand": "Four Seasons",
    "size": "285 g"
@@ -265,7 +219,6 @@
   "cb10": {
    "price": 69,
    "sku": "000000000000308242",
-   "image": "3b2fda96-f8d0-4a89-860b-10f6c99fe6b3/cucina-macaroni-pasta-500g",
    "name": "Macaroni Pasta 500g",
    "brand": "Cucina",
    "size": "500 g"
@@ -273,7 +226,6 @@
   "cb11": {
    "price": 249,
    "sku": "000000000527747001",
-   "image": "5017a85a-1c57-4fa4-a676-045b39b3fe76/harvest-morn-chocolate-protein-granola",
    "name": "Chocolate Protein Granola",
    "brand": "Harvest Morn",
    "size": "400 g"
@@ -281,7 +233,6 @@
   "cb12": {
    "price": 24,
    "sku": "000000000000339756",
-   "image": "51814ccd-c642-4601-a54f-192feeac108d/nature-s-pick-baking-potato",
    "name": "Baking Potato",
    "brand": "Nature's Pick",
    "size": "1 Each"

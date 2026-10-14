@@ -1,5 +1,5 @@
 // Keeps the app working with no signal in the shop.
-const CACHE = "shop-tally-v2";
+const CACHE = "shop-tally-v3";
 const SHELL = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

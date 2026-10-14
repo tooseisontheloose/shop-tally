@@ -3,214 +3,244 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Weekly Shop Tally</title>
+<title>Grocery List</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#2E7D5E">
+<meta name="theme-color" content="#17573F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Shop Tally">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
+/* Layout: green header band with floating budget card, aisle sections with emoji badges, white item cards, till-receipt trolley, floating tab pill. */
 *{box-sizing:border-box}
-:root{padding-top:env(safe-area-inset-top,0px)}
-/* Layout: one-column phone app. Sticky till-roll budget header, aisle-ordered list, bottom tab bar. */
+[hidden]{display:none!important}
 :root{
-  --bg:#F3F5F1; --surface:#FFFFFF; --ink:#18241F; --muted:#5E6B65; --line:#DCE2DD;
-  --accent:#1F6B52; --accent-ink:#FFFFFF; --accent-soft:#E1EEE8;
-  --warn:#B7791F; --over:#B42318; --done:#8A968F;
-  --go:#2E7D5E; --go-ink:#FFFFFF; --go-muted:#D3EBDF; --go-line:rgba(255,255,255,.22); --go-soft:rgba(255,255,255,.16);
-  --stop:#A7281C; --stop-soft:#FBE3DF; --stop-line:#F1C6BF;
-  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --f-body:"Figtree", system-ui, -apple-system, sans-serif;
-  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --bg:#F4F1EC; --surface:#FFFFFF; --ink:#15201B; --muted:#5B6A63; --line:#E2DDD4;
+  --band:#17573F; --band-ink:#FFFFFF; --band-sub:#BFE3D1; --band-chip:rgba(255,255,255,.14);
+  --accent:#17573F; --accent-ink:#FFFFFF; --accent-soft:#E1EEE8; --track:#ECE8E1; --plan:#B8DCC9;
+  --yellow:#FFD25A; --yellow-ink:#15201B; --stop:#A7281C; --over:#B42318; --warn:#B7791F;
+  --nav:#15201B; --nav-ink:#B9C4BE; --shadow:rgba(21,32,27,.12); --tile-mix:0%;
+  --f-ui:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Helvetica Neue","Segoe UI",system-ui,sans-serif;
+  --f-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#101614; --surface:#18201D; --ink:#E8EEEA; --muted:#97A39D; --line:#2A3531;
-  --accent:#5CC49B; --accent-ink:#0B1612; --accent-soft:#1D3229;
-  --warn:#E3A948; --over:#F0705F; --done:#66726C;
-  --go:#2A7457; --go-ink:#FFFFFF; --go-muted:#CBE6D8; --go-line:rgba(255,255,255,.18); --go-soft:rgba(255,255,255,.14);
-  --stop:#F39A8E; --stop-soft:#3A1F1C; --stop-line:#55302B; color-scheme:dark}}
+  --bg:#0F1513; --surface:#1A2420; --ink:#EEF2EF; --muted:#A3B0AA; --line:#2C3833;
+  --band:#123F2E; --band-ink:#FFFFFF; --band-sub:#A9D3BF; --band-chip:rgba(255,255,255,.12);
+  --accent:#6FD0A4; --accent-ink:#0B1612; --accent-soft:#1D3229; --track:#2A3530; --plan:#2F5A47;
+  --yellow:#FFD25A; --yellow-ink:#15201B; --stop:#F39A8E; --over:#F0705F; --warn:#E3A948;
+  --nav:#05090A; --nav-ink:#9AA6A0; --shadow:rgba(0,0,0,.45); --tile-mix:82%; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#101614; --surface:#18201D; --ink:#E8EEEA; --muted:#97A39D; --line:#2A3531;
-  --accent:#5CC49B; --accent-ink:#0B1612; --accent-soft:#1D3229;
-  --warn:#E3A948; --over:#F0705F; --done:#66726C;
-  --go:#2A7457; --go-ink:#FFFFFF; --go-muted:#CBE6D8; --go-line:rgba(255,255,255,.18); --go-soft:rgba(255,255,255,.14);
-  --stop:#F39A8E; --stop-soft:#3A1F1C; --stop-line:#55302B; color-scheme:dark}
+  --bg:#0F1513; --surface:#1A2420; --ink:#EEF2EF; --muted:#A3B0AA; --line:#2C3833;
+  --band:#123F2E; --band-ink:#FFFFFF; --band-sub:#A9D3BF; --band-chip:rgba(255,255,255,.12);
+  --accent:#6FD0A4; --accent-ink:#0B1612; --accent-soft:#1D3229; --track:#2A3530; --plan:#2F5A47;
+  --yellow:#FFD25A; --yellow-ink:#15201B; --stop:#F39A8E; --over:#F0705F; --warn:#E3A948;
+  --nav:#05090A; --nav-ink:#9AA6A0; --shadow:rgba(0,0,0,.45); --tile-mix:82%; color-scheme:dark}
 
-html,body{height:100%}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent}
-.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
-button,input{font:inherit;color:inherit}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button,input,select{font:inherit;color:inherit}
 button{cursor:pointer}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+:focus-visible{outline:2.5px solid var(--yellow);outline-offset:2px;border-radius:8px}
 .mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 120px}
 
-/* Header */
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 12px;border-bottom:1px dashed var(--line)}
-.brandrow{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-h1{font-family:var(--f-display);font-weight:800;font-size:22px;letter-spacing:-.01em;margin:0}
-.checked{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.tally{display:grid;grid-template-columns:1fr auto;gap:2px 12px;margin-top:10px;align-items:end}
-.big{font-family:var(--f-mono);font-weight:700;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
-.big small{font-size:14px;color:var(--muted);font-weight:500}
-.budgetbtn{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted);white-space:nowrap}
-.budgetbtn b{color:var(--ink);font-family:var(--f-mono)}
-.bar{grid-column:1/-1;height:10px;border-radius:5px;background:var(--line);position:relative;overflow:hidden;margin-top:8px}
-.bar i{position:absolute;inset:0 auto 0 0;border-radius:5px}
-.bar .plan{background:var(--accent-soft)}
-.bar .cart{background:var(--accent)}
-.bar.warn .cart{background:var(--warn)} .bar.over .cart,.bar.over .plan{background:var(--over)}
-.sub{grid-column:1/-1;display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:4px;gap:8px;flex-wrap:wrap}
-.sub .left.over{color:var(--over);font-weight:600}
-.budgetedit{display:flex;gap:8px;margin-top:10px}
+/* Header band */
+.band{background:var(--band);color:var(--band-ink);border-radius:0 0 32px 32px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-bottom:92px}
+.bandin{max-width:560px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:6px}
+.toprow{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.store{border:0;background:var(--band-chip);color:var(--band-ink);font-weight:700;font-size:15px;height:36px;padding:0 12px 0 10px;border-radius:999px;display:flex;align-items:center;gap:6px;min-width:0}
+.store span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.store svg{flex:none}
+.shopbtn{border:0;background:var(--yellow);color:var(--yellow-ink);font-weight:800;font-size:15px;height:36px;padding:0 14px;border-radius:999px;display:flex;align-items:center;gap:6px;flex:none}
+.band h1{margin:12px 0 0;font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
+.subline{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:var(--band-sub);font-size:15px;font-weight:600}
+.sync{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--band-chip);color:var(--band-ink);white-space:nowrap}
+.sync::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--band-sub);margin-right:6px;vertical-align:1px}
+.sync[data-state="synced"]::before{background:#7BE0AF}
+.sync[data-state="offline"]::before{background:var(--yellow)}
+.sync[data-state="error"]::before{background:#FF8A7A}
+
+/* Budget card */
+.budget{margin-top:-76px;position:relative;z-index:2;background:var(--surface);border-radius:22px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 24px var(--shadow)}
+.brow{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.brow>div,.leftbtn{display:flex;flex-direction:column;gap:2px}
+.lbl{font-size:12.5px;font-weight:800;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.spent{font-size:44px;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.leftbtn{border:0;background:none;padding:0;align-items:flex-end;text-align:right}
+.leftbtn .left{font-size:26px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.leftbtn .left.over{color:var(--over)}
+.track{position:relative;height:34px}
+.rail{position:absolute;left:0;right:0;top:14px;height:14px;border-radius:7px;background:var(--track);overflow:hidden}
+.rail i{position:absolute;left:0;top:0;bottom:0;border-radius:7px}
+.rail .plan{background:var(--plan);border-radius:0 7px 7px 0}
+.rail .cart{background:var(--accent)}
+.rail.warn .cart{background:var(--warn)} .rail.over .plan{background:var(--over);opacity:.35} .rail.over .cart{background:var(--over)}
+.mark{position:absolute;top:10px;width:2px;height:22px;border-radius:1px;background:var(--muted)}
+.trolley{position:absolute;top:0;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:var(--yellow);border:3px solid var(--surface);display:grid;place-items:center;box-shadow:0 2px 6px var(--shadow)}
+@media (prefers-reduced-motion:no-preference){.rail i,.trolley,.mark{transition:all .35s cubic-bezier(.3,1.3,.5,1)}}
+.bfoot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13.5px;color:var(--muted);font-weight:600}
+.budgetedit{display:flex;gap:8px}
 .budgetedit input{flex:1;min-width:0}
 
-/* Inputs */
-.field{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 13px;width:100%;box-sizing:border-box}
-.btn{border:0;border-radius:12px;padding:11px 16px;background:var(--accent);color:var(--accent-ink);font-weight:600}
-.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
-.btn.small{padding:7px 12px;font-size:13px;border-radius:10px}
+/* Shop mode progress */
+.shopbar{margin-top:12px;background:var(--surface);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.sbtop{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800}
+.sprog{height:8px;border-radius:4px;background:var(--track);overflow:hidden}
+.sprog i{display:block;height:100%;width:0;background:var(--accent);border-radius:4px}
 
-/* Add */
+/* Inputs and buttons */
+.field{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:11px 13px;width:100%;color:var(--ink)}
+.btn{border:0;border-radius:14px;padding:12px 18px;background:var(--accent);color:var(--accent-ink);font-weight:800;min-height:44px}
+.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--line)}
+.btn.small{padding:8px 13px;font-size:14px;border-radius:12px;min-height:38px}
+.btn.yellow{background:var(--yellow);color:var(--yellow-ink)}
+
+/* Search */
 .add{margin-top:14px;position:relative}
-.results{margin-top:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.res{display:flex;width:100%;text-align:left;gap:10px;align-items:center;padding:10px 13px;border:0;background:none;border-bottom:1px solid var(--line)}
+.searchbox{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:0 12px;height:48px}
+.searchbox input{border:0;background:transparent;outline:none;flex:1;min-width:0;font-size:17px;color:var(--ink)}
+.results{margin-top:8px;background:var(--surface);border-radius:18px;overflow:hidden;box-shadow:0 10px 24px var(--shadow)}
+.res{display:flex;width:100%;text-align:left;gap:12px;align-items:center;padding:10px 14px;border:0;background:none;border-bottom:1px solid var(--line);min-height:60px}
 .res:last-child{border-bottom:0}
-.res .n{flex:1;min-width:0}
-.res .n span{display:block;font-size:12px;color:var(--muted)}
-.res .p{font-family:var(--f-mono);font-weight:700}
-.res.custom .n{color:var(--accent);font-weight:600}
-.custombox{display:grid;grid-template-columns:1fr 92px;gap:8px;margin-top:8px}
+.res .n{flex:1;min-width:0;font-weight:700}
+.res .n span{display:block;font-size:13px;color:var(--muted);font-weight:600}
+.res .p{font-weight:800;font-variant-numeric:tabular-nums}
+.res.custom .n{color:var(--accent)}
+.res .thumb{width:44px;height:44px;flex:none;border-radius:12px;background:#FFFFFF;display:grid;place-items:center;overflow:hidden;color:#5B6A63}
+.res .thumb img{width:100%;height:100%;object-fit:contain}
+.res .thumb svg{width:26px;height:26px}
+.custombox{display:grid;grid-template-columns:1fr 100px;gap:8px;margin-top:8px}
 .custombox .row{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end}
 
-/* List */
-.aisle{margin-top:20px}
-.aisle h2{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:600;display:flex;justify-content:space-between}
-.items{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-[hidden]{display:none!important}
-.sync{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-.sync::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);margin-right:6px;vertical-align:1px}
-.sync[data-state="synced"]{color:var(--accent);border-color:var(--accent)} .sync[data-state="synced"]::before{background:var(--accent)}
-.sync[data-state="offline"]::before{background:var(--warn)} .sync[data-state="error"]{color:var(--over)} .sync[data-state="error"]::before{background:var(--over)}
-.code{font-family:var(--f-mono);font-size:15px;letter-spacing:.04em;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;overflow-wrap:anywhere;user-select:all;margin:8px 0 12px}
-/* Outstanding rows: solid green. Ticked rows: soft red, gathered at the bottom. Row-local token overrides keep child rules working. */
-.item:not(.in){background:var(--go);color:var(--go-ink);--muted:var(--go-muted);--line:var(--go-line);--accent:var(--go-ink);--accent-ink:var(--go);--accent-soft:var(--go-soft);--warn:var(--go-ink)}
-.item.in{background:var(--stop-soft);color:var(--stop);--muted:var(--stop);--done:var(--stop);--line:var(--stop-line);--accent:var(--stop);--accent-ink:var(--stop-soft);--accent-soft:var(--stop-line);--warn:var(--stop)}
-.items .item:not(:last-child){border-bottom-color:var(--bg)}
-.items{border:0}
-.item .field{color:var(--ink);background:var(--surface)}
-.item .del{color:inherit}
-.aisle.trolley h2{color:var(--stop)}
-.ico{width:46px;height:46px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;border:0;padding:0}
-.ico svg{width:32px;height:32px;stroke-width:1.9}
+/* Aisles and items */
+.aisle{margin-top:20px;display:flex;flex-direction:column;gap:8px}
+.aisle h2{margin:0;display:flex;align-items:center;gap:10px;padding:0 4px;font-size:18px;font-weight:800}
+.aisle h2 .an{flex:1;min-width:0}
+.aisle h2 .sum{font-size:15px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.badge{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;font-size:18px;line-height:1;background:color-mix(in srgb,var(--tint) calc(100% - var(--tile-mix)),var(--surface));flex:none}
+.items{display:flex;flex-direction:column;gap:6px}
+.item{position:relative;border-radius:18px;overflow:hidden;background:var(--surface);isolation:isolate}
+.item .under{position:absolute;right:0;top:0;bottom:0;width:88px;z-index:0;border:0;background:#D70015;color:#FFFFFF;font-weight:800}
+.rowin{position:relative;z-index:1;display:flex;align-items:center;gap:12px;padding:10px 12px;min-height:74px;background:var(--surface);touch-action:pan-y}
+.item.open .rowin{transform:translateX(-88px)}
+@media (prefers-reduced-motion:no-preference){.rowin{transition:transform .22s ease}}
+.ico{width:54px;height:54px;flex:none;border-radius:15px;border:0;padding:0;display:grid;place-items:center;color:var(--muted);background:color-mix(in srgb,var(--tint) calc(100% - var(--tile-mix)),var(--surface))}
+.ico svg{width:30px;height:30px;stroke-width:1.8}
 .ico.photo{background:#FFFFFF;overflow:hidden;padding:3px}
 .ico.photo img{width:100%;height:100%;object-fit:contain;display:block}
-.item.in .ico.photo img{opacity:.55;filter:grayscale(.6)}
-.res .thumb{width:40px;height:40px;flex:none;border-radius:8px;background:#FFFFFF;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;color:var(--accent)}
-.res .thumb img{width:100%;height:100%;object-fit:contain}
-.res .thumb svg{width:24px;height:24px}
-.item.in .ico{background:var(--bg);color:var(--done)}
-.arow{display:grid;grid-template-columns:24px 1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
-.arow:last-child{border-bottom:0}
-.arow .mono{color:var(--muted);font-size:13px}
-.arow button:disabled{opacity:.35}
-.shopbar{margin-top:10px}
-.sbtop{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:600}
-.sprog{height:6px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}
-.sprog i{display:block;height:100%;width:0;background:var(--accent);border-radius:3px}
-body.shop .add, body.shop #hhBanner, body.shop .qty, body.shop nav.tabs{display:none}
-body.shop .wrap{padding-block-end:32px}
-body.shop .item{padding:14px 12px;grid-template-columns:44px 56px 1fr auto}
-body.shop .tick{width:40px;height:40px}
-body.shop .tick svg{width:20px;height:20px}
-body.shop .ico{width:56px;height:56px}
-body.shop .ico svg{width:38px;height:38px}
-body.shop .item .name b{font-size:17px;font-weight:600}
-body.shop .line{font-size:16px}
-body.shop .aisle h2{font-size:12.5px;color:var(--accent)}
-.item{display:grid;grid-template-columns:34px 46px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
-.item:last-child{border-bottom:0}
-.tick{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:none;display:grid;place-items:center;padding:0}
-.tick svg{width:16px;height:16px;opacity:0}
-.item.in .tick{background:var(--accent);border-color:var(--accent)}
-.item.in .tick svg{opacity:1;stroke:var(--accent-ink)}
-.item .name{min-width:0;border:0;background:none;text-align:left;padding:0}
-.item .name b{font-weight:500;display:block;overflow-wrap:anywhere}
-.item .name span{font-size:12px;color:var(--muted)}
-.item.in .name b{text-decoration:line-through;color:var(--done)}
-.right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.line{font-family:var(--f-mono);font-weight:700;font-variant-numeric:tabular-nums}
-.item.in .line{color:var(--done)}
-.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:999px}
-.qty button{border:0;background:none;width:28px;height:24px;font-weight:700;color:var(--muted)}
-.qty span{min-width:18px;text-align:center;font-family:var(--f-mono);font-size:13px}
-.tag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:4px;vertical-align:1px}
-.tag.own{border-color:var(--warn);color:var(--warn)}
-.editrow{grid-column:3/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.editrow input{width:90px}
-.editrow .del{color:var(--over);border-color:var(--line)}
+.name{flex:1;min-width:0;border:0;background:none;text-align:left;padding:0;display:flex;flex-direction:column;gap:2px}
+.name b{font-size:17px;font-weight:800;line-height:1.25;overflow-wrap:anywhere}
+.name b .q{color:var(--accent)}
+.name span{font-size:13.5px;font-weight:600;color:var(--muted)}
+.line{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tick{width:36px;height:36px;flex:none;border-radius:50%;border:2.5px solid var(--line);background:var(--surface);padding:0;display:grid;place-items:center}
+.tick svg{opacity:0;width:18px;height:18px}
+.tick:active{background:var(--accent-soft)}
+.tag{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:1px 7px;border-radius:999px;border:1.5px solid var(--warn);color:var(--warn);margin-left:6px;vertical-align:1px;white-space:nowrap}
+.editrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 12px 14px;background:var(--surface)}
+.editrow label{font-size:13.5px;color:var(--muted);font-weight:700}
+.editrow input{width:96px}
+.editrow .del{color:var(--over)}
+.qty{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:999px}
+.qty button{border:0;background:none;width:38px;height:36px;font-weight:800;color:var(--accent);font-size:18px}
+.qty span{min-width:22px;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
 
-.empty{margin-top:28px;text-align:center;color:var(--muted);padding:24px 12px;border:1px dashed var(--line);border-radius:14px}
-.empty b{display:block;color:var(--ink);font-family:var(--f-display);font-size:18px;margin-bottom:4px}
-.example{margin-top:14px;font-size:13px;background:var(--accent-soft);border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
-.confirm{margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+/* Till receipt for ticked items */
+.receiptwrap{margin-top:22px;display:flex;flex-direction:column;filter:drop-shadow(0 6px 14px var(--shadow))}
+.receipt{background:var(--surface);border-radius:18px 18px 0 0;padding:14px 16px 10px;display:flex;flex-direction:column;gap:6px;font-family:var(--f-mono);color:var(--stop)}
+.rhead{display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.rule{border-top:1.5px dashed var(--line);margin:2px 0}
+.rline{width:100%;display:flex;justify-content:space-between;gap:10px;border:0;background:none;padding:6px 0;text-align:left;font-family:var(--f-mono);font-size:14.5px;color:var(--stop);min-height:36px;align-items:center}
+.rline .rn{text-decoration:line-through;min-width:0;overflow-wrap:anywhere}
+.rtotal{display:flex;justify-content:space-between;font-size:15px;font-weight:700;color:var(--ink);padding-top:2px}
+.rhint{font-size:12px;color:var(--muted);font-family:var(--f-ui);font-weight:600}
+.zig{display:block;width:100%;height:10px;color:var(--surface)}
+
+/* Shop mode */
+body.shop .add, body.shop #hhBanner, body.shop nav.tabs{display:none}
+body.shop .rowin{min-height:86px;padding:12px 14px}
+body.shop .ico{width:62px;height:62px}
+body.shop .name b{font-size:19px}
+body.shop .tick{width:46px;height:46px;border-width:3px}
+body.shop .wrap{padding-block-end:40px}
+
+/* Other pages */
+.empty{margin-top:22px;text-align:center;color:var(--muted);padding:26px 16px;border:2px dashed var(--line);border-radius:20px;font-weight:600}
+.empty b{display:block;color:var(--ink);font-size:20px;font-weight:800;margin-bottom:4px}
+.example{margin-top:14px;font-size:14px;font-weight:600;background:var(--accent-soft);border-radius:16px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.confirm{margin-top:12px;background:var(--surface);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 24px var(--shadow)}
 .confirm .row{display:flex;gap:8px;flex-wrap:wrap}
-
-/* Staples */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:14px}
-.card h3{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0}
-.card p{margin:4px 0 10px;color:var(--muted);font-size:13px}
+.card{background:var(--surface);border-radius:20px;padding:16px;margin-top:14px}
+.card h3{font-weight:800;font-size:19px;margin:0}
+.card p{margin:4px 0 10px;color:var(--muted);font-size:14px;font-weight:600}
 .card .row{display:flex;gap:8px;flex-wrap:wrap}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
-.chip{font-size:12.5px;padding:3px 9px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
-h2.sect{font-family:var(--f-display);font-weight:600;font-size:20px;margin:22px 0 0}
-.note{font-size:13px;color:var(--muted);margin-top:6px}
-.history{margin-top:10px}
-.hrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.chip{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--bg)}
+h2.sect{font-weight:800;font-size:24px;margin:26px 0 0}
+.page-top{padding-top:18px}
+.note{font-size:14px;color:var(--muted);margin-top:6px;font-weight:600}
+.history{margin-top:10px;background:var(--surface);border-radius:20px;padding:4px 16px}
+.hrow{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1.5px dashed var(--line);font-size:15px;font-weight:700}
+.hrow:last-child{border-bottom:0}
 .hrow .mono.over{color:var(--over)}
+.code{font-family:var(--f-mono);font-size:14px;background:var(--bg);border:1.5px dashed var(--line);border-radius:12px;padding:10px 12px;overflow-wrap:anywhere;user-select:all;margin:8px 0 12px}
+.arow{display:grid;grid-template-columns:34px 1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1.5px dashed var(--line);font-weight:700}
+.arow:last-child{border-bottom:0}
+.arow .em{font-size:20px}
+.arow button:disabled{opacity:.35}
 
-/* Tabs */
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-nav.tabs .in{display:flex;max-width:560px;width:100%}
-nav.tabs button{flex:1;border:0;background:none;padding:12px 4px 13px;font-weight:600;color:var(--muted);font-size:14px;border-top:3px solid transparent}
-nav.tabs button[aria-selected="true"]{color:var(--accent);border-top-color:var(--accent)}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(70px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:13.5px;z-index:9;max-width:calc(100% - 40px)}
-@media (prefers-reduced-motion:no-preference){.bar i{transition:width .25s ease}}
+/* Floating tab bar */
+nav.tabs{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;justify-content:center}
+nav.tabs .in{display:flex;max-width:528px;width:100%;background:var(--nav);border-radius:24px;padding:6px;box-shadow:0 10px 24px var(--shadow)}
+nav.tabs button{flex:1;border:0;background:none;padding:6px 4px;border-radius:18px;font-weight:800;color:var(--nav-ink);font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:52px;justify-content:center}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-selected="true"]{color:var(--yellow)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:14px;font-size:14px;font-weight:700;z-index:9;max-width:calc(100% - 40px)}
 </style>
 </head>
 <body>
+<header class="band">
+  <div class="bandin">
+    <div class="toprow">
+      <button class="store" id="storeBtn" aria-label="Change store"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD25A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg><span id="storeName">Aldi, Chadderton</span><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="shopbtn" id="shopBtn"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.3"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span id="shopBtnLabel">Shop</span></button>
+    </div>
+    <h1>Grocery List</h1>
+    <div class="subline"><span id="toGet">Nothing on the list yet</span><span class="sync" id="sync" data-state="local">This phone only</span></div>
+  </div>
+</header>
 <div class="wrap">
-  <header class="top">
-    <div class="brandrow">
-      <h1>Weekly Shop Tally</h1>
-      <span class="sync" id="sync" data-state="local">This phone only</span>
+  <section class="budget" aria-label="Budget">
+    <div class="brow">
+      <div><span class="lbl">Spent so far</span><span class="spent" id="spent">£0.00</span></div>
+      <button class="leftbtn" id="budgetBtn" aria-label="Change weekly budget"><span class="lbl">Left of <span id="budgetVal">£60</span></span><span class="left" id="leftOf">£60.00</span></button>
     </div>
-    <div class="tally">
-      <div>
-        <div class="big" id="bigTotal">£0.00 <small>planned</small></div>
-      </div>
-      <button class="budgetbtn" id="budgetBtn" aria-label="Change weekly budget">Budget <b id="budgetVal">£60</b></button>
-      <div class="bar" id="bar"><i class="plan" id="barPlan"></i><i class="cart" id="barCart"></i></div>
-      <div class="sub"><span id="inTrolley">£0.00 in trolley</span><span class="left" id="leftOf">£60.00 left</span></div>
+    <div class="track" aria-hidden="true">
+      <div class="rail" id="bar"><i class="plan" id="barPlan"></i><i class="cart" id="barCart"></i></div>
+      <i class="mark" id="planMark"></i>
+      <span class="trolley" id="trolleyDot"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#15201B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.3"/></svg></span>
     </div>
-    <div class="shopbar" id="shopBar" hidden>
-      <div class="sbtop"><span id="shopProg">0 of 0 in trolley</span><button class="btn ghost small" id="exitShop">Exit shop mode</button></div>
-      <div class="sprog"><i id="shopProgBar"></i></div>
-    </div>
+    <div class="bfoot"><span id="inTrolley">Nothing in the trolley yet</span><span id="listTotal">List total £0.00</span></div>
     <form class="budgetedit" id="budgetForm" hidden>
-      <input class="field mono" id="budgetInput" inputmode="decimal" placeholder="Weekly budget in £" aria-label="Weekly budget in pounds">
+      <input class="field" id="budgetInput" inputmode="decimal" placeholder="Weekly budget in £" aria-label="Weekly budget in pounds">
       <button class="btn" type="submit">Set</button>
     </form>
-  </header>
+    <form class="budgetedit" id="storeForm" hidden>
+      <input class="field" id="storeInput" placeholder="Your Aldi, e.g. Chadderton" aria-label="Your Aldi store">
+      <button class="btn" type="submit">Save</button>
+    </form>
+  </section>
+  <div class="shopbar" id="shopBar" hidden>
+    <div class="sbtop"><span id="shopProg">0 of 0 in the trolley</span><button class="btn ghost small" id="exitShop" hidden>Done</button></div>
+    <div class="sprog"><i id="shopProgBar"></i></div>
+  </div>
 
   <section id="tab-list">
     <div class="add">
-      <input class="field" id="search" type="search" autocomplete="off" placeholder="Add an item, e.g. eggs, milk, cheddar" aria-label="Add an item">
+      <label class="searchbox" for="search"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="search" type="search" autocomplete="off" placeholder="Add from Aldi's range" aria-label="Add an item"></label>
       <div class="results" id="results" hidden></div>
       <form class="custombox" id="customForm" hidden>
         <input class="field" id="customName" placeholder="Item name" aria-label="Item name">
@@ -224,7 +254,7 @@ nav.tabs button[aria-selected="true"]{color:var(--accent);border-top-color:var(-
     <div id="confirmArea"></div>
   </section>
 
-  <section id="tab-staples" hidden>
+  <section id="tab-staples" class="page-top" hidden>
     <h2 class="sect">Saved lists</h2>
     <p class="note">Things you buy most weeks. Add a whole saved list to this week's shop in one tap.</p>
     <div id="staplesArea"></div>
@@ -237,7 +267,7 @@ nav.tabs button[aria-selected="true"]{color:var(--accent);border-top-color:var(-
     <div class="history" id="historyArea"></div>
   </section>
 
-  <section id="tab-about" hidden>
+  <section id="tab-about" class="page-top" hidden>
     <h2 class="sect">Household list</h2>
     <div class="card" id="hhArea"></div>
     <h2 class="sect">Aisle order</h2>
@@ -250,9 +280,9 @@ nav.tabs button[aria-selected="true"]{color:var(--accent);border-top-color:var(-
 </div>
 
 <nav class="tabs" aria-label="Sections"><div class="in" role="tablist">
-  <button role="tab" id="t-list" aria-selected="true" data-tab="list">This week</button>
-  <button role="tab" id="t-staples" aria-selected="false" data-tab="staples">Saved lists</button>
-  <button role="tab" id="t-about" aria-selected="false" data-tab="about">Settings</button>
+  <button role="tab" id="t-list" aria-selected="true" data-tab="list"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>List</button>
+  <button role="tab" id="t-staples" aria-selected="false" data-tab="staples"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Saved</button>
+  <button role="tab" id="t-about" aria-selected="false" data-tab="about"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Settings</button>
 </div></nav>
 <div class="toast" id="toast" hidden></div>
 
@@ -369,10 +399,10 @@ function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}}
 const MAPS=["items","myPrices","custom","itemAisle"];
 function toDoc(st){const items={};st.list.forEach((it,i)=>{items[it.key]={ref:it.ref||null,cref:it.cref||null,sku:it.sku||null,snap:it.snap||null,qty:it.qty,inTrolley:!!it.inTrolley,o:i}});
-  return {items,myPrices:st.myPrices||{},custom:st.custom||{},itemAisle:st.itemAisle||{},budget:st.budget,saved:st.saved||[],history:st.history||[],aisles:st.aisles||[],bringAdded:!!st.bringAdded}}
+  return {items,myPrices:st.myPrices||{},custom:st.custom||{},itemAisle:st.itemAisle||{},budget:st.budget,saved:st.saved||[],history:st.history||[],aisles:st.aisles||[],store:st.store||"",bringAdded:!!st.bringAdded}}
 function fromDoc(d){const base=exampleState();
   const list=Object.entries(d.items||{}).map(([key,v])=>({key,ref:v.ref||undefined,cref:v.cref||undefined,sku:v.sku||undefined,snap:v.snap||undefined,qty:v.qty||1,inTrolley:!!v.inTrolley,o:v.o||0})).sort((x,y)=>x.o-y.o);
-  return Object.assign(base,{list,myPrices:d.myPrices||{},custom:d.custom||{},itemAisle:d.itemAisle||{},budget:d.budget||base.budget,saved:d.saved||[],history:d.history||[],aisles:d.aisles||[],bringAdded:!!d.bringAdded})}
+  return Object.assign(base,{list,myPrices:d.myPrices||{},custom:d.custom||{},itemAisle:d.itemAisle||{},budget:d.budget||base.budget,saved:d.saved||[],history:d.history||[],aisles:d.aisles||[],store:d.store||"",bringAdded:!!d.bringAdded})}
 let remote=null, lastDoc=null, unsub=null, pendingRender=false, household=lsGet(LS_HH);
 function persist(){
   lsSet(LS_KEY,JSON.stringify(S));
@@ -505,80 +535,76 @@ function addItem(item){
 function dropExample(){if(S.example){S.list=[];S.example=false}}
 
 // ---------- render ----------
+const AISLE_LOOK={"Fruits & Vegetables":["🥦","#DDEFD3"],"Crisps & Nuts":["🥨","#F6E6C8"],"Tins & Jars":["🥫","#F6D9D2"],"Eggs":["🥚","#F4EBD3"],
+ "Potatoes & Onions":["🥔","#F2E4CC"],"Pasta & Rice":["🍝","#F7E7C2"],"Meat & Fish":["🐟","#F5D9DC"],"Juice & Drinks":["🧃","#FBE5C8"],
+ "Milk & Cheese":["🧀","#DCE7F6"],"Yoghurts & Desserts":["🍦","#EADFF3"],"Middle Aisle":["🛍️","#E6E2DA"],"Baby & Care":["🧴","#DDEEF0"],
+ "Household":["🧻","#E3E8EA"],"Frozen & Convenience":["🧊","#D9ECF6"],"Cereals":["🥣","#F6E9CF"],"Snacks & Sweets":["🍫","#EDDCD2"],
+ "Bread & Pastries":["🍞","#F3E3CB"],"Tea & Coffee":["☕","#E9DED3"],"Other":["🛒","#E6E2DA"]};
+const look=a=>AISLE_LOOK[a]||AISLE_LOOK.Other;
+const TICK_SVG='<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+let openKey=null;
 function render(){
   $("#checkedDate").textContent=LIVE.updatedMs?priceLabel(new Date(LIVE.updatedMs)):CHECKED;
-  const {plan,cart}=totals(), b=S.budget;
-  $("#bigTotal").innerHTML=gbp(plan)+" <small>planned</small>";
+  const {plan,cart,needs}=totals(), b=S.budget;
+  $("#storeName").textContent="Aldi, "+(S.store||"Chadderton");
+  $("#spent").textContent=gbp(cart);
   $("#budgetVal").textContent=gbp(b).replace(".00","");
-  const needs=totals().needs;
-  $("#inTrolley").textContent=gbp(cart)+" in trolley"+(needs?" · "+needs+" need a price":"");
-  const left=b-plan; const lo=$("#leftOf");
-  lo.textContent= left>=0? gbp(left)+" left" : gbp(-left)+" over budget";
-  lo.classList.toggle("over",left<0);
+  const left=b-plan, lo=$("#leftOf");
+  lo.textContent=left>=0?gbp(left):"−"+gbp(-left); lo.classList.toggle("over",left<0);
+  $("#budgetBtn .lbl").firstChild.textContent=left>=0?"Left of ":"Over ";
+  const nIn=S.list.filter(x=>x.inTrolley).length, nAll=S.list.length;
+  $("#inTrolley").textContent=nAll?`${nIn} of ${nAll} in the trolley`+(needs?` · ${needs} need a price`:""):"Nothing on the list yet";
+  $("#listTotal").textContent="List total "+gbp(plan);
+  const togo=nAll-nIn;
+  $("#toGet").textContent=!nAll?"Nothing on the list yet":togo?`${togo} item${togo===1?"":"s"} still to get`:"Everything's in the trolley";
   const bar=$("#bar"); bar.classList.toggle("over",plan>b); bar.classList.toggle("warn",plan<=b&&plan>b*0.9);
-  $("#barPlan").style.width=Math.min(100,b?plan/b*100:0)+"%";
-  $("#barCart").style.width=Math.min(100,b?cart/b*100:0)+"%";
+  const pc=Math.min(100,b?plan/b*100:0), cc=Math.min(100,b?cart/b*100:0);
+  $("#barPlan").style.width=pc+"%"; $("#barCart").style.width=cc+"%";
+  $("#planMark").style.left=`calc(${pc}% - 1px)`; $("#planMark").hidden=!plan;
+  $("#trolleyDot").style.left=`clamp(14px, ${cc}%, calc(100% - 14px))`;
+  $("#shopBtnLabel").textContent=shopMode?"Done":"Shop";
   renderHousehold();
 
   const area=$("#listArea"); area.innerHTML="";
-  if(!S.list.length){
-    area.innerHTML='<div class="empty"><b>Your list is empty</b>Type above to add items, or add a saved list from Saved lists.</div>';
-  }
   document.body.classList.toggle("shop",shopMode);
   $("#shopBar").hidden=!shopMode;
-  if(shopMode){const done=S.list.filter(x=>x.inTrolley).length;
-    $("#shopProg").textContent=`${done} of ${S.list.length} in trolley`;
-    $("#shopProgBar").style.width=(S.list.length?done/S.list.length*100:0)+"%";}
+  if(shopMode){$("#shopProg").textContent=`${nIn} of ${nAll} in the trolley`;$("#shopProgBar").style.width=(nAll?nIn/nAll*100:0)+"%";}
+  if(!nAll) area.innerHTML='<div class="empty"><b>Your list is empty</b>Search above to add things from Aldi, or add your Weekly staples from Saved.</div>';
+  else if(!togo) area.innerHTML='<div class="empty"><b>Everything is in the trolley</b>Tap Finish shop to log what you spent.</div>';
+
   const groups={}; for(const it of S.list){if(it.inTrolley)continue;const a=info(it).aisle;(groups[a]=groups[a]||[]).push(it)}
-  const sections=aisleOrder().filter(a=>groups[a]).map(a=>[a,groups[a]]);
-  {const inT=S.list.filter(x=>x.inTrolley); if(inT.length) sections.push(["In trolley",inT]);
-    if(shopMode&&S.list.length&&(sections.length===1&&sections[0][0]==="In trolley")) area.insertAdjacentHTML("afterbegin",'<div class="empty"><b>Everything is in the trolley</b>Tap Finish shop to log your total.</div>');}
-  for(const [a,grp] of sections){
-    const items=grp.slice().sort((x,y)=>x.inTrolley-y.inTrolley);
-    const sec=document.createElement("div"); sec.className="aisle"+(a==="In trolley"?" trolley":"");
+  for(const a of aisleOrder().filter(a=>groups[a])){
+    const items=groups[a], [emoji,tint]=look(a);
+    const sec=document.createElement("div"); sec.className="aisle";
     const sub=items.reduce((s,it)=>s+info(it).price*it.qty,0);
-    sec.innerHTML=`<h2><span>${a}${a==="In trolley"?" ("+items.length+")":""}</span><span class="mono">${gbp(sub)}</span></h2>`;
+    sec.innerHTML=`<h2><span class="badge" style="--tint:${tint}" aria-hidden="true">${emoji}</span><span class="an"></span><span class="sum">${gbp(sub)}</span></h2>`;
+    sec.querySelector(".an").textContent=a;
     const box=document.createElement("div"); box.className="items";
-    for(const it of items){ const f=info(it);
-      const row=document.createElement("div"); row.className="item"+(it.inTrolley?" in":"");
-      row.innerHTML=`<button class="tick" aria-label="${it.inTrolley?"Take out of trolley":"Put in trolley"}"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg></button>
-        <button class="ico${f.img?" photo":""}" tabindex="-1" aria-hidden="true">${f.img?`<img src="${imgUrl(f.img,160)}" alt="" loading="lazy" decoding="async">`:iconFor(f)}</button>
-        <button class="name" aria-label="Edit ${esc(f.name)}"><b></b><span></span></button>
-        <div class="right"><span class="line">${f.needs?"£ ?":gbp(f.price*it.qty)}</span>
-        <div class="qty"><button aria-label="One less">−</button><span>${it.qty}</span><button aria-label="One more">+</button></div></div>`;
-      row.querySelector(".name b").textContent=f.name;
-      row.querySelector(".name span").innerHTML=f.needs?'Tap to add the shelf price<span class="tag own">add price</span>':esc([f.brand,f.size].filter(Boolean).join(" · "))+(f.own?'<span class="tag own">your price</span>':'');
-      const im=row.querySelector(".ico img"); if(im) im.onerror=()=>{const box=im.parentNode;box.classList.remove("photo");box.innerHTML=iconFor(f)};
-      const toggle=()=>{it.inTrolley=!it.inTrolley;if(navigator.vibrate)try{navigator.vibrate(12)}catch(e){};persist();render()};
-      row.querySelector(".tick").onclick=toggle; row.querySelector(".ico").onclick=toggle;
-      const [minus,plus]=row.querySelectorAll(".qty button");
-      minus.onclick=()=>{if(it.qty>1){it.qty--}else{S.list=S.list.filter(x=>x!==it)}persist();render()};
-      plus.onclick=()=>{it.qty++;persist();render()};
-      row.querySelector(".name").onclick=()=>{editingKey=editingKey===it.key?null:it.key;render();const i=document.getElementById("price-"+it.key);if(i)i.focus()};
-      if(editingKey===it.key){
-        const ed=document.createElement("div"); ed.className="editrow";
-        ed.innerHTML=`<label for="price-${it.key}" style="font-size:13px;color:var(--muted)">Shelf price £</label><input class="field mono" id="price-${it.key}" inputmode="decimal" placeholder="e.g. 1.49" value="${f.needs?"":(f.price/100).toFixed(2)}"><button class="btn small">Save</button>${f.own&&(it.ref||it.sku)?'<button class="btn ghost small reset">Use Aldi price</button>':''}<button class="btn ghost small del">Remove</button>
-          <label for="aisle-${it.key}" style="font-size:13px;color:var(--muted)">Aisle</label><select class="field" id="aisle-${it.key}" style="width:auto;padding:8px 10px">${AISLES.map(a=>`<option${a===f.aisle?" selected":""}>${a}</option>`).join("")}</select>`;
-        ed.querySelector("select").onchange=e=>{S.itemAisle=S.itemAisle||{};S.itemAisle[it.sku?"s"+it.sku:(it.ref||it.cref)]=e.target.value;editingKey=null;persist();render();toast("Moved to "+e.target.value)};
-        const inp=ed.querySelector("input");
-        const save=()=>{const p=parsePounds(inp.value);if(p==null){toast("Enter a price like 1.49");return}
-          if(it.sku)S.myPrices["s"+it.sku]={p,t:Date.now()};else if(it.ref)S.myPrices[it.ref]={p,t:Date.now()};else{S.custom[it.cref].price=p;S.custom[it.cref].t=Date.now()} editingKey=null;persist();render();toast("Price updated")};
-        ed.querySelector(".btn:not(.ghost)").onclick=save;
-        inp.onkeydown=e=>{if(e.key==="Enter")save()};
-        const r=ed.querySelector(".reset"); if(r) r.onclick=()=>{delete S.myPrices[it.sku?"s"+it.sku:it.ref];editingKey=null;persist();render()};
-        ed.querySelector(".del").onclick=()=>{S.list=S.list.filter(x=>x!==it);editingKey=null;persist();render()};
-        row.appendChild(ed);
-      }
-      box.appendChild(row);
-    }
+    for(const it of items) box.appendChild(itemRow(it,tint));
     sec.appendChild(box); area.appendChild(sec);
   }
+
+  const inT=S.list.filter(x=>x.inTrolley);
+  if(inT.length){
+    const w=document.createElement("div"); w.className="receiptwrap";
+    const tot=inT.reduce((s,it)=>s+info(it).price*it.qty,0);
+    w.innerHTML=`<div class="receipt"><div class="rhead"><span>In the trolley</span><span>${inT.length} item${inT.length===1?"":"s"}</span></div><div class="rule"></div><div class="rlines"></div><div class="rule"></div><div class="rtotal"><span>SUBTOTAL</span><span>${gbp(tot)}</span></div><div class="rhint">Tap an item to take it back out</div></div><svg class="zig" viewBox="0 0 360 10" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0 0H360V2L353 9 346 2 339 9 332 2 325 9 318 2 311 9 304 2 297 9 290 2 283 9 276 2 269 9 262 2 255 9 248 2 241 9 234 2 227 9 220 2 213 9 206 2 199 9 192 2 185 9 178 2 171 9 164 2 157 9 150 2 143 9 136 2 129 9 122 2 115 9 108 2 101 9 94 2 87 9 80 2 73 9 66 2 59 9 52 2 45 9 38 2 31 9 24 2 17 9 10 2 3 9 0 2Z"/></svg>`;
+    const lines=w.querySelector(".rlines");
+    for(const it of inT){const f=info(it);
+      const l=document.createElement("button"); l.className="rline"; l.setAttribute("aria-label","Take "+f.name+" out of the trolley");
+      l.innerHTML=`<span class="rn"></span><span>${f.needs?"?":(f.price*it.qty/100).toFixed(2)}</span>`;
+      l.querySelector(".rn").textContent=(it.qty>1?it.qty+" × ":"")+f.name;
+      l.onclick=()=>{it.inTrolley=false;haptic();persist();render()};
+      lines.appendChild(l);}
+    area.appendChild(w);
+  }
+
   const acts=$("#listActions"); acts.innerHTML="";
-  if(S.list.length){
+  if(nAll){
     const fin=document.createElement("button"); fin.className=shopMode?"btn":"btn ghost"; fin.textContent="Finish shop";
     fin.onclick=()=>showConfirm("finish");
     if(!shopMode){
-      const go=document.createElement("button"); go.className="btn"; go.textContent="Start shopping";
+      const go=document.createElement("button"); go.className="btn yellow"; go.textContent="Start shopping";
       go.onclick=()=>setShop(true);
       const clr=document.createElement("button"); clr.className="btn ghost"; clr.textContent="Clear list";
       clr.onclick=()=>showConfirm("clear");
@@ -587,6 +613,54 @@ function render(){
   }
   renderAisles();
   renderStaples();
+}
+function haptic(){if(navigator.vibrate)try{navigator.vibrate(12)}catch(e){}}
+function itemRow(it,tint){
+  const f=info(it);
+  const row=document.createElement("div"); row.className="item"+(openKey===it.key?" open":"");
+  row.innerHTML=`<button class="under" tabindex="-1">Delete</button>
+    <div class="rowin">
+      <button class="ico${f.img?" photo":""}" style="--tint:${tint}" tabindex="-1" aria-hidden="true">${f.img?`<img src="${imgUrl(f.img,160)}" alt="" loading="lazy" decoding="async">`:iconFor(f)}</button>
+      <button class="name" aria-label="Edit ${esc(f.name)}"><b></b><span></span></button>
+      <span class="line">${f.needs?"£ ?":gbp(f.price*it.qty)}</span>
+      <button class="tick" aria-label="Put ${esc(f.name)} in the trolley">${TICK_SVG}</button>
+    </div>`;
+  const nb=row.querySelector(".name b");
+  if(it.qty>1){const q=document.createElement("span");q.className="q";q.textContent=it.qty+" × ";nb.appendChild(q)}
+  nb.appendChild(document.createTextNode(f.name));
+  row.querySelector(".name span").innerHTML=f.needs?'Tap to add the shelf price<span class="tag">add price</span>':esc([f.brand,f.size].filter(Boolean).join(" · "))+(f.own?'<span class="tag">your price</span>':'');
+  const im=row.querySelector(".ico img"); if(im) im.onerror=()=>{const bx=im.parentNode;bx.classList.remove("photo");bx.innerHTML=iconFor(f)};
+  const toggle=()=>{if(openKey){openKey=null;render();return}it.inTrolley=true;haptic();persist();render()};
+  row.querySelector(".tick").onclick=toggle; row.querySelector(".ico").onclick=toggle;
+  row.querySelector(".under").onclick=()=>{S.list=S.list.filter(x=>x!==it);openKey=null;persist();render();toast("Removed "+f.name)};
+  row.querySelector(".name").onclick=()=>{if(openKey){openKey=null;render();return}editingKey=editingKey===it.key?null:it.key;render();const i=document.getElementById("price-"+it.key);if(i)i.focus()};
+  // swipe left to reveal Delete
+  const rin=row.querySelector(".rowin"); let x0=null,y0=0,dx=0,horiz=null;
+  rin.addEventListener("touchstart",e=>{const t=e.touches[0];x0=t.clientX;y0=t.clientY;dx=0;horiz=null},{passive:true});
+  rin.addEventListener("touchmove",e=>{if(x0==null)return;const t=e.touches[0];const mx=t.clientX-x0,my=t.clientY-y0;
+    if(horiz==null&&(Math.abs(mx)>8||Math.abs(my)>8))horiz=Math.abs(mx)>Math.abs(my);
+    if(horiz){dx=mx;const base=openKey===it.key?-88:0;rin.style.transition="none";rin.style.transform=`translateX(${Math.max(-110,Math.min(0,base+dx))}px)`}},{passive:true});
+  rin.addEventListener("touchend",()=>{if(x0==null)return;rin.style.transition="";rin.style.transform="";
+    if(horiz){const was=openKey===it.key;if(!was&&dx<-50){openKey=it.key;haptic()}else if(was&&dx>30){openKey=null}render()}x0=null},{passive:true});
+  if(editingKey===it.key){
+    const ed=document.createElement("div"); ed.className="editrow";
+    ed.innerHTML=`<label for="price-${it.key}">Shelf price £</label><input class="field" id="price-${it.key}" inputmode="decimal" placeholder="e.g. 1.49" value="${f.needs?"":(f.price/100).toFixed(2)}"><button class="btn small save">Save</button>${f.own&&(it.ref||it.sku)?'<button class="btn ghost small reset">Use Aldi price</button>':''}
+      <div class="qty" aria-label="Quantity"><button class="qm" aria-label="One less">−</button><span>${it.qty}</span><button class="qp" aria-label="One more">+</button></div>
+      <label for="aisle-${it.key}">Aisle</label><select class="field" id="aisle-${it.key}" style="width:auto;padding:8px 10px">${AISLES.map(a=>`<option${a===f.aisle?" selected":""}>${a}</option>`).join("")}</select>
+      <button class="btn ghost small del">Remove</button>`;
+    ed.querySelector("select").onchange=e=>{S.itemAisle=S.itemAisle||{};S.itemAisle[it.sku?"s"+it.sku:(it.ref||it.cref)]=e.target.value;editingKey=null;persist();render();toast("Moved to "+e.target.value)};
+    const inp=ed.querySelector("input");
+    const save=()=>{const p=parsePounds(inp.value);if(p==null){toast("Enter a price like 1.49");return}
+      if(it.sku)S.myPrices["s"+it.sku]={p,t:Date.now()};else if(it.ref)S.myPrices[it.ref]={p,t:Date.now()};else{S.custom[it.cref].price=p;S.custom[it.cref].t=Date.now()} editingKey=null;persist();render();toast("Price updated")};
+    ed.querySelector(".save").onclick=save;
+    inp.onkeydown=e=>{if(e.key==="Enter")save()};
+    ed.querySelector(".qm").onclick=()=>{if(it.qty>1){it.qty--;persist();render()}};
+    ed.querySelector(".qp").onclick=()=>{it.qty++;persist();render()};
+    const r=ed.querySelector(".reset"); if(r) r.onclick=()=>{delete S.myPrices[it.sku?"s"+it.sku:it.ref];editingKey=null;persist();render()};
+    ed.querySelector(".del").onclick=()=>{S.list=S.list.filter(x=>x!==it);editingKey=null;persist();render()};
+    row.appendChild(ed);
+  }
+  return row;
 }
 // ---------- item pictures (hand-drawn line icons) ----------
 const ICONS={
@@ -635,7 +709,7 @@ function renderAisles(){
   const box=$("#aisleArea"); if(!box) return; box.innerHTML="";
   const o=aisleOrder();
   o.forEach((a,i)=>{const r=document.createElement("div");r.className="arow";
-    r.innerHTML=`<span class="mono">${i+1}</span><span class="an"></span><button class="btn ghost small" aria-label="Move ${a} earlier" ${i===0?"disabled":""}>↑</button><button class="btn ghost small" aria-label="Move ${a} later" ${i===o.length-1?"disabled":""}>↓</button>`;
+    r.innerHTML=`<span class="em" aria-hidden="true">${look(a)[0]}</span><span class="an"></span><button class="btn ghost small" aria-label="Move ${a} earlier" ${i===0?"disabled":""}>↑</button><button class="btn ghost small" aria-label="Move ${a} later" ${i===o.length-1?"disabled":""}>↓</button>`;
     r.querySelector(".an").textContent=a;
     const [up,dn]=r.querySelectorAll("button");
     const mv=d=>{const n=o.slice();[n[i],n[i+d]]=[n[i+d],n[i]];S.aisles=n;persist();render()};
@@ -721,7 +795,7 @@ function guessAisle(n){n=n.toLowerCase();
   for(const [a,r] of m) if(r.test(n)) return a; return "Food Cupboard";}
 
 // ---------- budget ----------
-$("#budgetBtn").onclick=()=>{const f=$("#budgetForm");f.hidden=!f.hidden;if(!f.hidden){$("#budgetInput").value=(S.budget/100).toFixed(0);$("#budgetInput").focus()}};
+$("#budgetBtn").onclick=()=>{const f=$("#budgetForm");f.hidden=!f.hidden;$("#storeForm").hidden=true;if(!f.hidden){$("#budgetInput").value=(S.budget/100).toFixed(0);$("#budgetInput").focus()}};
 $("#budgetForm").addEventListener("submit",e=>{e.preventDefault();const p=parsePounds($("#budgetInput").value);if(!p){toast("Enter a budget, like 60");return}S.budget=p;$("#budgetForm").hidden=true;persist();render();toast("Budget set to "+gbp(p))});
 
 // ---------- staples ----------
@@ -756,6 +830,10 @@ $("#newListForm").addEventListener("submit",e=>{e.preventDefault();
 function switchTab(t){for(const n of ["list","staples","about"]){$("#tab-"+n).hidden=n!==t;$("#t-"+n).setAttribute("aria-selected",n===t)}window.scrollTo(0,0)}
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 $("#exitShop").onclick=()=>setShop(false);
+$("#shopBtn").onclick=()=>setShop(!shopMode);
+$("#storeBtn").onclick=()=>{const f=$("#storeForm");f.hidden=!f.hidden;$("#budgetForm").hidden=true;if(!f.hidden){$("#storeInput").value=S.store||"Chadderton";$("#storeInput").focus()}};
+$("#storeForm").addEventListener("submit",e=>{e.preventDefault();const v=$("#storeInput").value.trim().replace(/^aldi,?\s*/i,"");if(!v){toast("Type your Aldi's town or area");return}S.store=v;$("#storeForm").hidden=true;persist();render();toast("Store set to Aldi, "+v)});
+document.addEventListener("click",e=>{if(openKey&&!e.target.closest(".item.open")){openKey=null;render()}});
 $("#goHousehold").onclick=()=>switchTab("about");
 let tt; function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2000)}
 
