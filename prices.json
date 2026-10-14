@@ -1,120 +1,241 @@
 {
- "updated": "2026-10-14T10:00:00Z",
+ "updated": "2026-10-14T12:00:08.424Z",
  "source": "aldi.co.uk catalogue",
  "items": {
   "a0": {
-   "price": 165
+   "price": 165,
+   "sku": "000000000000416770"
   },
   "a1": {
-   "price": 240
+   "price": 240,
+   "sku": "000000000000416713"
   },
   "a2": {
-   "price": 165
+   "price": 165,
+   "sku": "000000000000416772"
   },
   "a3": {
-   "price": 165
+   "price": 165,
+   "sku": "000000000000416864"
   },
   "a4": {
-   "price": 169
+   "price": 169,
+   "sku": "000000000000417584"
   },
   "a5": {
-   "price": 169
+   "price": 169,
+   "sku": "000000000000423400"
   },
   "a6": {
-   "price": 209
+   "price": 209,
+   "sku": "000000000000423466"
   },
   "a7": {
-   "price": 99
+   "price": 99,
+   "sku": "000000000000422329"
   },
   "a8": {
-   "price": 95
+   "price": 95,
+   "sku": "000000000000543221"
   },
   "a9": {
-   "price": 95
+   "price": 95,
+   "sku": "000000000755310001"
   },
   "a10": {
-   "price": 55
+   "price": 55,
+   "sku": "000000000418246001"
   },
   "a11": {
-   "price": 65
+   "price": 65,
+   "sku": "000000000000534181"
   },
   "a12": {
-   "price": 65
+   "price": 65,
+   "sku": "000000000000534177"
   },
   "a13": {
-   "price": 99
+   "price": 99,
+   "sku": "000000000000548465"
   },
   "a14": {
-   "price": 149
+   "price": 149,
+   "sku": "000000000000416701"
   },
   "a15": {
-   "price": 169
+   "price": 169,
+   "sku": "000000000000416688"
   },
   "a16": {
-   "price": 189
+   "price": 189,
+   "sku": "000000000000417638"
   },
   "a17": {
-   "price": 249
+   "price": 249,
+   "sku": "000000000000417633"
   },
   "a18": {
    "price": 289
   },
   "a19": {
-   "price": 285
+   "price": 285,
+   "sku": "000000000000417635"
   },
   "a20": {
-   "price": 225
+   "price": 225,
+   "sku": "000000000000417565"
   },
   "a21": {
-   "price": 199
+   "price": 199,
+   "sku": "000000000416427001"
   },
   "a22": {
-   "price": 285
+   "price": 285,
+   "sku": "000000000417607001"
   },
   "a23": {
-   "price": 285
+   "price": 285,
+   "sku": "000000000417607002"
   },
   "a24": {
-   "price": 99
+   "price": 99,
+   "sku": "000000000000696215"
   },
   "a25": {
-   "price": 149
+   "price": 149,
+   "sku": "000000000549702002"
   },
   "a26": {
-   "price": 299
+   "price": 299,
+   "sku": "000000000282692002"
   },
   "a27": {
-   "price": 169
+   "price": 169,
+   "sku": "000000000584602001"
   },
   "a28": {
-   "price": 199
+   "price": 199,
+   "sku": "000000000422367001"
   },
   "a29": {
-   "price": 109
+   "price": 109,
+   "sku": "000000000418129002"
   },
   "a30": {
-   "price": 49
+   "price": 49,
+   "sku": "000000000670216001"
   },
   "a31": {
-   "price": 109
+   "price": 109,
+   "sku": "000000000000339840"
   },
   "a32": {
-   "price": 139
+   "price": 139,
+   "sku": "000000000000476098"
   },
   "a33": {
-   "price": 52
+   "price": 52,
+   "sku": "000000000000335591"
   },
   "a34": {
-   "price": 89
+   "price": 89,
+   "sku": "000000000000307869"
   },
   "a35": {
-   "price": 129
+   "price": 129,
+   "sku": "000000000000467832"
   },
   "a36": {
-   "price": 175
+   "price": 175,
+   "sku": "000000000307934001"
   },
   "a37": {
-   "price": 199
+   "price": 199,
+   "sku": "000000000462502003"
+  },
+  "cb1": {
+   "price": 349,
+   "sku": "000000000706936002",
+   "name": "Chocolate Coconut Clusters",
+   "brand": "The Foodie Market",
+   "size": "200 g"
+  },
+  "cb2": {
+   "price": 249,
+   "sku": "000000000402653001",
+   "name": "100% British Beef Roasted Topside of Beef 5 Slices",
+   "brand": "Specially Selected",
+   "size": ""
+  },
+  "cb3": {
+   "price": 299,
+   "sku": "000000000706863002",
+   "name": "Alcohol Free Sparkling White",
+   "brand": "Costellore",
+   "size": "750 ml"
+  },
+  "cb4": {
+   "price": 139,
+   "sku": "000000000385962002",
+   "name": "Bake at Home Stonebaked Baguettes with Sourdough",
+   "brand": "Specially Selected",
+   "size": "2 Each"
+  },
+  "cb5": {
+   "price": 99,
+   "sku": "000000000621612002",
+   "name": "Cherry Cola Bottle Ice Lollies 6 Pack",
+   "brand": "Gianni'S",
+   "size": "360 ml"
+  },
+  "cb6": {
+   "price": 199,
+   "sku": "000000000000368596",
+   "name": "Breaded Cod Fish Fingers 10 Pack",
+   "brand": "The Fishmonger",
+   "size": "300 g"
+  },
+  "cb7": {
+   "price": 399,
+   "sku": "000000000000644155",
+   "name": "Blast Kitchen Towel 3 Pack",
+   "brand": "Power Force",
+   "size": "300 Sheets"
+  },
+  "cb8": {
+   "price": 289,
+   "sku": "000000000622124002",
+   "name": "Light Mini Babybels 10 Pack",
+   "brand": "Babybel",
+   "size": "200 g"
+  },
+  "cb9": {
+   "price": 129,
+   "sku": "000000000000339993",
+   "name": "British Sweetcorn",
+   "brand": "Nature'S Pick",
+   "size": "2 Each"
+  },
+  "cb10": {
+   "price": 49,
+   "sku": "000000000615407003",
+   "name": "Cupshotz Macaroni Cheese",
+   "brand": "Bramwells Express",
+   "size": "62 g"
+  },
+  "cb11": {
+   "price": 109,
+   "sku": "000000000511093004",
+   "name": "Apple Cinnamon Yogurt Granola",
+   "brand": "Specially Selected",
+   "size": "150 g"
+  },
+  "cb12": {
+   "price": 89,
+   "sku": "000000000000371223",
+   "name": "Alphabet Potato Letters",
+   "brand": "Four Seasons",
+   "size": "454 g"
   }
  }
 }
