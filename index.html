@@ -108,6 +108,10 @@ button{cursor:pointer}
 .res .n span{display:block;font-size:13px;color:var(--muted);font-weight:600}
 .res .p{font-weight:800;font-variant-numeric:tabular-nums}
 .res.custom .n{color:var(--accent)}
+.res.more{justify-content:space-between;min-height:52px}
+.res.more .n{color:var(--accent);font-weight:800}
+.res.more .p{font-size:13.5px;color:var(--muted);font-weight:700}
+.rescount{padding:10px 14px 6px;font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)}
 .res .thumb{width:44px;height:44px;flex:none;border-radius:12px;background:#FFFFFF;display:grid;place-items:center;overflow:hidden;color:#5B6A63}
 .res .thumb img{width:100%;height:100%;object-fit:contain}
 .res .thumb svg{width:26px;height:26px}
@@ -850,16 +854,40 @@ function showConfirm(kind){
 
 // ---------- search / add ----------
 const search=$("#search"), results=$("#results");
-search.addEventListener("input",()=>{
+// Spelling help: British spellings and plurals still find Aldi's names
+const SPELL={yoghurt:"yogurt",yoghurts:"yogurt",yogurts:"yogurt",yoghourt:"yogurt",nappy:"napp",nappies:"napp",kitchenroll:"kitchen",
+ chocolates:"chocolate",chillies:"chilli",chilies:"chilli",courgettes:"courgette",aubergines:"aubergine",tinned:"tin",tins:"tin"};
+function wordAlts(w){const out=[w];if(SPELL[w])out.push(SPELL[w]);
+  if(w.length>4&&w.endsWith("ies")){out.push(w.slice(0,-3)+"y");out.push(w.slice(0,-1))}
+  else if(w.length>4&&w.endsWith("oes"))out.push(w.slice(0,-2));
+  else if(w.length>4&&w.endsWith("es"))out.push(w.slice(0,-2),w.slice(0,-1));
+  else if(w.length>3&&w.endsWith("s"))out.push(w.slice(0,-1));
+  return [...new Set(out)].filter(x=>x.length>=2)}
+function rangeMatches(text){
+  const q=norm(text).trim(); if(!q||!RANGE.length) return [];
+  const words=q.split(/\s+/).map(wordAlts);
+  const score=x=>{let sc=0;
+    for(const alts of words){let best=-1,hit="";
+      for(const w of alts){const i=x.h.indexOf(w);if(i>=0&&(best<0||i<best)){best=i;hit=w}}
+      if(best<0)return -1;
+      sc+=(best===0||x.h[best-1]===" "?2:1);
+      if(x.nn.endsWith(hit)||x.nn.endsWith(hit+"s"))sc+=4;if(x.nn===hit)sc+=4;if(norm(x.d||"").includes(hit))sc+=3}
+    if(x.p!=null)sc+=1;return sc};
+  return RANGE.map(x=>[x,score(x)]).filter(([,sc])=>sc>=0).sort((a,b)=>b[1]-a[1]||a[0].n.length-b[0].n.length).map(([x])=>x);
+}
+let searchShown=12;
+search.addEventListener("input",()=>{searchShown=12;drawResults()});
+function drawResults(){
   $("#addPanel").hidden=true;
   const q=norm(search.value).trim();
   if(!q){results.hidden=true;return}
-  const words=q.split(/\s+/);
-  const score=x=>{let sc=0;for(const w of words){const i=x.h.indexOf(w);if(i<0)return -1;sc+=(i===0||x.h[i-1]===" "?2:1);if(x.nn.endsWith(w)||x.nn.endsWith(w+"s"))sc+=4;if(x.nn===w)sc+=4;if(norm(x.d||"").includes(w))sc+=3}if(x.p!=null)sc+=1;return sc};
-  const rhits=RANGE.length?RANGE.map(x=>[x,score(x)]).filter(([,sc])=>sc>=0).sort((a,b)=>b[1]-a[1]||a[0].n.length-b[0].n.length).slice(0,12).map(([x])=>x):[];
-  const hits=RANGE.length?[]:CAT.filter(c=>{const h=norm(c.name+" "+c.brand+" "+c.size);return words.every(w=>h.includes(w))}).slice(0,8);
-  const customs=Object.entries(S.custom).filter(([k,c])=>words.every(w=>norm(c.name).includes(w))).slice(0,4);
+  const words=q.split(/\s+/).map(wordAlts);
+  const has=h=>words.every(alts=>alts.some(w=>h.includes(w)));
+  const all=rangeMatches(search.value), rhits=all.slice(0,searchShown);
+  const hits=RANGE.length?[]:CAT.filter(c=>has(norm(c.name+" "+c.brand+" "+c.size))).slice(0,8);
+  const customs=Object.entries(S.custom).filter(([k,c])=>has(norm(c.name))).slice(0,4);
   results.innerHTML="";
+  if(all.length){const hd=document.createElement("div");hd.className="rescount";hd.textContent=all.length===1?"1 Aldi product":`${all.length} Aldi products`;results.appendChild(hd)}
   for(const c of hits){ const own=info({ref:c.id}).price;
     const b=document.createElement("button"); b.className="res";
     b.innerHTML=`<span class="n"></span><span class="p">${gbp(own!=null?own:c.price)}</span>`;
@@ -875,6 +903,11 @@ search.addEventListener("input",()=>{
     b.onclick=()=>{const r=fromRange(x);openAdd({sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a,i:r.i}},x.i)};
     results.appendChild(b);
   }
+  if(all.length>searchShown){const more=document.createElement("button");more.className="res more";
+    const n=Math.min(20,all.length-searchShown);
+    more.innerHTML=`<span class="n">Show ${n} more</span><span class="p">${all.length-searchShown} left</span>`;
+    more.onclick=()=>{searchShown+=20;drawResults();const r=results.querySelectorAll(".res:not(.more):not(.custom)");const t=r[searchShown-20];if(t)t.scrollIntoView({block:"nearest"})};
+    results.appendChild(more)}
   for(const [k,c] of customs){
     const b=document.createElement("button"); b.className="res";
     {const f=info({cref:k});b.innerHTML=`<span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;}
@@ -886,7 +919,7 @@ search.addEventListener("input",()=>{
   add.innerHTML=`<span class="n">Add “${esc(search.value.trim())}” with my own price</span>`;
   add.onclick=()=>{results.hidden=true;$("#customForm").hidden=false;$("#customName").value=search.value.trim();$("#customPrice").focus()};
   results.appendChild(add); results.hidden=false;
-});
+}
 function done(name){search.value="";results.hidden=true;$("#addPanel").hidden=true;persist();render();toast("Added "+name)}
 // Choose how many before adding
 function openAdd(item,img){
@@ -938,13 +971,11 @@ let editingSaved=null;
 // Find products for any search box: full Aldi range when loaded, else the built-in list, plus the household's own items
 function findProducts(text,limit){
   const q=norm(text).trim(); if(!q) return [];
-  const words=q.split(/\s+/), out=[];
+  const words=q.split(/\s+/).map(wordAlts), has=h=>words.every(alts=>alts.some(w=>h.includes(w))), out=[];
   if(RANGE.length){
-    const score=x=>{let sc=0;for(const w of words){const i=x.h.indexOf(w);if(i<0)return -1;sc+=(i===0||x.h[i-1]===" "?2:1);if(x.nn.endsWith(w)||x.nn.endsWith(w+"s"))sc+=4;if(x.nn===w)sc+=4;if(norm(x.d||"").includes(w))sc+=3}if(x.p!=null)sc+=1;return sc};
-    for(const [x] of RANGE.map(x=>[x,score(x)]).filter(([,sc])=>sc>=0).sort((a,b)=>b[1]-a[1]||a[0].n.length-b[0].n.length).slice(0,limit||8)){
-      const r=fromRange(x); out.push({item:{sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a,i:r.i}},img:x.i});}
-  } else for(const c of CAT.filter(c=>{const h=norm(c.name+" "+c.brand+" "+c.size);return words.every(w=>h.includes(w))}).slice(0,limit||8)) out.push({item:{ref:c.id},img:""});
-  for(const [k,c] of Object.entries(S.custom).filter(([k,c])=>words.every(w=>norm(c.name).includes(w))).slice(0,3)) out.push({item:{cref:k},img:""});
+    for(const x of rangeMatches(text).slice(0,limit||8)){const r=fromRange(x);out.push({item:{sku:x.s,snap:{name:r.name,brand:r.brand,size:r.size,price:r.price,c:r.c,d:r.d,a:r.a,i:r.i}},img:x.i})}
+  } else for(const c of CAT.filter(c=>has(norm(c.name+" "+c.brand+" "+c.size))).slice(0,limit||8)) out.push({item:{ref:c.id},img:""});
+  for(const [k,c] of Object.entries(S.custom).filter(([k,c])=>has(norm(c.name))).slice(0,3)) out.push({item:{cref:k},img:""});
   return out;
 }
 function savedEditor(L,idx){
@@ -971,7 +1002,9 @@ function savedEditor(L,idx){
   const nm=c.querySelector("#se-name");
   nm.onchange=()=>{const v=nm.value.trim();if(v){L.name=v;persist();render()}};
   const sb=c.querySelector("#se-search"), res=c.querySelector("#se-results");
-  sb.oninput=()=>{res.innerHTML="";const found=findProducts(sb.value,8);
+  let seShown=10;
+  sb.oninput=()=>{seShown=10;drawSe()};
+  const drawSe=()=>{res.innerHTML="";const total=rangeMatches(sb.value).length;const found=findProducts(sb.value,seShown);
     for(const {item,img} of found){const f=info(item);
       const b=document.createElement("button"); b.className="res";
       b.innerHTML=`<span class="thumb">${img?`<img src="${imgUrl(img,120)}" alt="" loading="lazy">`:iconFor(f)}</span><span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;
@@ -979,6 +1012,7 @@ function savedEditor(L,idx){
       b.onclick=()=>{const ex=L.items.find(y=>sameItem(y,item));if(ex)ex.qty++;else L.items.push({ref:item.ref||null,cref:item.cref||null,sku:item.sku||null,snap:item.snap||null,qty:1});
         persist();render();toast("Added "+f.name+" to "+L.name);setTimeout(()=>{const i=document.getElementById("se-search");if(i)i.focus()},50)};
       res.appendChild(b);}
+    if(total>seShown){const more=document.createElement("button");more.className="res more";more.innerHTML=`<span class="n">Show ${Math.min(20,total-seShown)} more</span><span class="p">${total-seShown} left</span>`;more.onclick=()=>{seShown+=20;drawSe()};res.appendChild(more)}
     if(sb.value.trim()){const own=document.createElement("button");own.className="res custom";own.innerHTML=`<span class="n">Add “${esc(sb.value.trim())}” as my own item</span>`;
       own.onclick=()=>{const name=sb.value.trim();let k=Object.keys(S.custom).find(k=>S.custom[k].name.toLowerCase()===name.toLowerCase());
         if(!k){k="c"+uid();S.custom[k]={name,price:null,aisle:guessAisle(name)}}
