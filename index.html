@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Weekly Shop Tally</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#2E7D5E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Shop Tally">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px)}
+/* Layout: one-column phone app. Sticky till-roll budget header, aisle-ordered list, bottom tab bar. */
+:root{
+  --bg:#F3F5F1; --surface:#FFFFFF; --ink:#18241F; --muted:#5E6B65; --line:#DCE2DD;
+  --accent:#1F6B52; --accent-ink:#FFFFFF; --accent-soft:#E1EEE8;
+  --warn:#B7791F; --over:#B42318; --done:#8A968F;
+  --go:#2E7D5E; --go-ink:#FFFFFF; --go-muted:#D3EBDF; --go-line:rgba(255,255,255,.22); --go-soft:rgba(255,255,255,.16);
+  --stop:#A7281C; --stop-soft:#FBE3DF; --stop-line:#F1C6BF;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Figtree", system-ui, -apple-system, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101614; --surface:#18201D; --ink:#E8EEEA; --muted:#97A39D; --line:#2A3531;
+  --accent:#5CC49B; --accent-ink:#0B1612; --accent-soft:#1D3229;
+  --warn:#E3A948; --over:#F0705F; --done:#66726C;
+  --go:#2A7457; --go-ink:#FFFFFF; --go-muted:#CBE6D8; --go-line:rgba(255,255,255,.18); --go-soft:rgba(255,255,255,.14);
+  --stop:#F39A8E; --stop-soft:#3A1F1C; --stop-line:#55302B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101614; --surface:#18201D; --ink:#E8EEEA; --muted:#97A39D; --line:#2A3531;
+  --accent:#5CC49B; --accent-ink:#0B1612; --accent-soft:#1D3229;
+  --warn:#E3A948; --over:#F0705F; --done:#66726C;
+  --go:#2A7457; --go-ink:#FFFFFF; --go-muted:#CBE6D8; --go-line:rgba(255,255,255,.18); --go-soft:rgba(255,255,255,.14);
+  --stop:#F39A8E; --stop-soft:#3A1F1C; --stop-line:#55302B; color-scheme:dark}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* Header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 12px;border-bottom:1px dashed var(--line)}
+.brandrow{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-weight:800;font-size:22px;letter-spacing:-.01em;margin:0}
+.checked{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tally{display:grid;grid-template-columns:1fr auto;gap:2px 12px;margin-top:10px;align-items:end}
+.big{font-family:var(--f-mono);font-weight:700;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:14px;color:var(--muted);font-weight:500}
+.budgetbtn{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted);white-space:nowrap}
+.budgetbtn b{color:var(--ink);font-family:var(--f-mono)}
+.bar{grid-column:1/-1;height:10px;border-radius:5px;background:var(--line);position:relative;overflow:hidden;margin-top:8px}
+.bar i{position:absolute;inset:0 auto 0 0;border-radius:5px}
+.bar .plan{background:var(--accent-soft)}
+.bar .cart{background:var(--accent)}
+.bar.warn .cart{background:var(--warn)} .bar.over .cart,.bar.over .plan{background:var(--over)}
+.sub{grid-column:1/-1;display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:4px;gap:8px;flex-wrap:wrap}
+.sub .left.over{color:var(--over);font-weight:600}
+.budgetedit{display:flex;gap:8px;margin-top:10px}
+.budgetedit input{flex:1;min-width:0}
+
+/* Inputs */
+.field{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 13px;width:100%;box-sizing:border-box}
+.btn{border:0;border-radius:12px;padding:11px 16px;background:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+.btn.small{padding:7px 12px;font-size:13px;border-radius:10px}
+
+/* Add */
+.add{margin-top:14px;position:relative}
+.results{margin-top:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.res{display:flex;width:100%;text-align:left;gap:10px;align-items:center;padding:10px 13px;border:0;background:none;border-bottom:1px solid var(--line)}
+.res:last-child{border-bottom:0}
+.res .n{flex:1;min-width:0}
+.res .n span{display:block;font-size:12px;color:var(--muted)}
+.res .p{font-family:var(--f-mono);font-weight:700}
+.res.custom .n{color:var(--accent);font-weight:600}
+.custombox{display:grid;grid-template-columns:1fr 92px;gap:8px;margin-top:8px}
+.custombox .row{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end}
+
+/* List */
+.aisle{margin-top:20px}
+.aisle h2{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:600;display:flex;justify-content:space-between}
+.items{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+[hidden]{display:none!important}
+.sync{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.sync::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);margin-right:6px;vertical-align:1px}
+.sync[data-state="synced"]{color:var(--accent);border-color:var(--accent)} .sync[data-state="synced"]::before{background:var(--accent)}
+.sync[data-state="offline"]::before{background:var(--warn)} .sync[data-state="error"]{color:var(--over)} .sync[data-state="error"]::before{background:var(--over)}
+.code{font-family:var(--f-mono);font-size:15px;letter-spacing:.04em;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;overflow-wrap:anywhere;user-select:all;margin:8px 0 12px}
+/* Outstanding rows: solid green. Ticked rows: soft red, gathered at the bottom. Row-local token overrides keep child rules working. */
+.item:not(.in){background:var(--go);color:var(--go-ink);--muted:var(--go-muted);--line:var(--go-line);--accent:var(--go-ink);--accent-ink:var(--go);--accent-soft:var(--go-soft);--warn:var(--go-ink)}
+.item.in{background:var(--stop-soft);color:var(--stop);--muted:var(--stop);--done:var(--stop);--line:var(--stop-line);--accent:var(--stop);--accent-ink:var(--stop-soft);--accent-soft:var(--stop-line);--warn:var(--stop)}
+.items .item:not(:last-child){border-bottom-color:var(--bg)}
+.items{border:0}
+.item .field{color:var(--ink);background:var(--surface)}
+.item .del{color:inherit}
+.aisle.trolley h2{color:var(--stop)}
+.ico{width:46px;height:46px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;border:0;padding:0}
+.ico svg{width:32px;height:32px;stroke-width:1.9}
+.item.in .ico{background:var(--bg);color:var(--done)}
+.arow{display:grid;grid-template-columns:24px 1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
+.arow:last-child{border-bottom:0}
+.arow .mono{color:var(--muted);font-size:13px}
+.arow button:disabled{opacity:.35}
+.shopbar{margin-top:10px}
+.sbtop{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:600}
+.sprog{height:6px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}
+.sprog i{display:block;height:100%;width:0;background:var(--accent);border-radius:3px}
+body.shop .add, body.shop #hhBanner, body.shop .qty, body.shop nav.tabs{display:none}
+body.shop .wrap{padding-block-end:32px}
+body.shop .item{padding:14px 12px;grid-template-columns:44px 56px 1fr auto}
+body.shop .tick{width:40px;height:40px}
+body.shop .tick svg{width:20px;height:20px}
+body.shop .ico{width:56px;height:56px}
+body.shop .ico svg{width:38px;height:38px}
+body.shop .item .name b{font-size:17px;font-weight:600}
+body.shop .line{font-size:16px}
+body.shop .aisle h2{font-size:12.5px;color:var(--accent)}
+.item{display:grid;grid-template-columns:34px 46px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.tick{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:none;display:grid;place-items:center;padding:0}
+.tick svg{width:16px;height:16px;opacity:0}
+.item.in .tick{background:var(--accent);border-color:var(--accent)}
+.item.in .tick svg{opacity:1;stroke:var(--accent-ink)}
+.item .name{min-width:0;border:0;background:none;text-align:left;padding:0}
+.item .name b{font-weight:500;display:block;overflow-wrap:anywhere}
+.item .name span{font-size:12px;color:var(--muted)}
+.item.in .name b{text-decoration:line-through;color:var(--done)}
+.right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.line{font-family:var(--f-mono);font-weight:700;font-variant-numeric:tabular-nums}
+.item.in .line{color:var(--done)}
+.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:999px}
+.qty button{border:0;background:none;width:28px;height:24px;font-weight:700;color:var(--muted)}
+.qty span{min-width:18px;text-align:center;font-family:var(--f-mono);font-size:13px}
+.tag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:4px;vertical-align:1px}
+.tag.own{border-color:var(--warn);color:var(--warn)}
+.editrow{grid-column:3/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.editrow input{width:90px}
+.editrow .del{color:var(--over);border-color:var(--line)}
+
+.empty{margin-top:28px;text-align:center;color:var(--muted);padding:24px 12px;border:1px dashed var(--line);border-radius:14px}
+.empty b{display:block;color:var(--ink);font-family:var(--f-display);font-size:18px;margin-bottom:4px}
+.example{margin-top:14px;font-size:13px;background:var(--accent-soft);border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.confirm{margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.confirm .row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Staples */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:14px}
+.card h3{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0}
+.card p{margin:4px 0 10px;color:var(--muted);font-size:13px}
+.card .row{display:flex;gap:8px;flex-wrap:wrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+.chip{font-size:12.5px;padding:3px 9px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
+h2.sect{font-family:var(--f-display);font-weight:600;font-size:20px;margin:22px 0 0}
+.note{font-size:13px;color:var(--muted);margin-top:6px}
+.history{margin-top:10px}
+.hrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.hrow .mono.over{color:var(--over)}
+
+/* Tabs */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+nav.tabs .in{display:flex;max-width:560px;width:100%}
+nav.tabs button{flex:1;border:0;background:none;padding:12px 4px 13px;font-weight:600;color:var(--muted);font-size:14px;border-top:3px solid transparent}
+nav.tabs button[aria-selected="true"]{color:var(--accent);border-top-color:var(--accent)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(70px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:13.5px;z-index:9;max-width:calc(100% - 40px)}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .25s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brandrow">
+      <h1>Weekly Shop Tally</h1>
+      <span class="sync" id="sync" data-state="local">This phone only</span>
+    </div>
+    <div class="tally">
+      <div>
+        <div class="big" id="bigTotal">£0.00 <small>planned</small></div>
+      </div>
+      <button class="budgetbtn" id="budgetBtn" aria-label="Change weekly budget">Budget <b id="budgetVal">£60</b></button>
+      <div class="bar" id="bar"><i class="plan" id="barPlan"></i><i class="cart" id="barCart"></i></div>
+      <div class="sub"><span id="inTrolley">£0.00 in trolley</span><span class="left" id="leftOf">£60.00 left</span></div>
+    </div>
+    <div class="shopbar" id="shopBar" hidden>
+      <div class="sbtop"><span id="shopProg">0 of 0 in trolley</span><button class="btn ghost small" id="exitShop">Exit shop mode</button></div>
+      <div class="sprog"><i id="shopProgBar"></i></div>
+    </div>
+    <form class="budgetedit" id="budgetForm" hidden>
+      <input class="field mono" id="budgetInput" inputmode="decimal" placeholder="Weekly budget in £" aria-label="Weekly budget in pounds">
+      <button class="btn" type="submit">Set</button>
+    </form>
+  </header>
+
+  <section id="tab-list">
+    <div class="add">
+      <input class="field" id="search" type="search" autocomplete="off" placeholder="Add an item, e.g. eggs, milk, cheddar" aria-label="Add an item">
+      <div class="results" id="results" hidden></div>
+      <form class="custombox" id="customForm" hidden>
+        <input class="field" id="customName" placeholder="Item name" aria-label="Item name">
+        <input class="field mono" id="customPrice" inputmode="decimal" placeholder="£ price" aria-label="Shelf price in pounds">
+        <div class="row"><button class="btn ghost small" type="button" id="customCancel">Cancel</button><button class="btn small" type="submit">Add to list</button></div>
+      </form>
+    </div>
+    <div id="hhBanner" class="example" hidden><span>Share this list with your household so you both see the same thing.</span><button class="btn small" id="goHousehold">Set up</button></div>
+    <div id="listArea"></div>
+    <div class="actions" id="listActions"></div>
+    <div id="confirmArea"></div>
+  </section>
+
+  <section id="tab-staples" hidden>
+    <h2 class="sect">Saved lists</h2>
+    <p class="note">Things you buy most weeks. Add a whole saved list to this week's shop in one tap.</p>
+    <div id="staplesArea"></div>
+    <form class="card" id="newListForm">
+      <h3>Save this week's list</h3>
+      <p>Saves everything currently on your list, with quantities.</p>
+      <div class="row"><input class="field" id="newListName" placeholder="Name, e.g. Weekly staples" aria-label="Saved list name" style="flex:1;min-width:0"><button class="btn" type="submit">Save</button></div>
+    </form>
+    <h2 class="sect">Past shops</h2>
+    <div class="history" id="historyArea"></div>
+  </section>
+
+  <section id="tab-about" hidden>
+    <h2 class="sect">Household list</h2>
+    <div class="card" id="hhArea"></div>
+    <h2 class="sect">Aisle order</h2>
+    <p class="note">Put these in the order you walk round your Aldi. Your list and shop mode follow this order.</p>
+    <div class="card aisles" id="aisleArea"></div>
+    <h2 class="sect">Where prices come from</h2>
+    <p class="note">Prices without a tag come from Aldi UK's online catalogue, which lists the in-store price of each product. They're checked automatically every Monday and were last updated on <b id="checkedDate"></b>. If the shelf says something different, tap the item and type the shelf price. Your price is used until Aldi's next update.</p>
+    <p class="note">Items you add yourself show a <span class="tag own">your price</span> tag. The app remembers your price for that item next time.</p>
+      </section>
+</div>
+
+<nav class="tabs" aria-label="Sections"><div class="in" role="tablist">
+  <button role="tab" id="t-list" aria-selected="true" data-tab="list">This week</button>
+  <button role="tab" id="t-staples" aria-selected="false" data-tab="staples">Saved lists</button>
+  <button role="tab" id="t-about" aria-selected="false" data-tab="about">Settings</button>
+</div></nav>
+<div class="toast" id="toast" hidden></div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+const CHECKED = "14 Oct 2026";
+// Tosie's walk round her Aldi, in order
+const AISLES = ["Fruits & Vegetables","Crisps & Nuts","Tins & Jars","Eggs","Potatoes & Onions","Pasta & Rice","Meat & Fish","Juice & Drinks","Milk & Cheese","Yoghurts & Desserts","Middle Aisle","Baby & Care","Household","Frozen & Convenience","Cereals","Snacks & Sweets","Bread & Pastries","Tea & Coffee","Other"];
+const AISLE_RULES=[
+ ["Tea & Coffee",/coffee|\btea\b|tea bags|hot chocolate/],
+ ["Juice & Drinks",/juice|smoothie|squash|\bwater\b|\bcola\b|lemonade|fizzy/],
+ ["Baby & Care",/nappy|nappies|wipes|\bbaby\b|formula|shampoo|toothpaste|soap|shower|deodorant|plasters|paracetamol/],
+ ["Household",/kitchen roll|toilet|tissue|washing|detergent|bleach|bin bag|foil|cling|sponge|cleaner|fabric/],
+ ["Frozen & Convenience",/frozen|ice cream|lolly|lollies|fish finger|oven chips|\bpeas\b|pizza|ready meal/],
+ ["Pasta & Rice",/pasta|macaroni|spaghetti|penne|fusilli|\brice\b|noodle|tagliatelle|couscous/],
+ ["Cereals",/cereal|granola|oats|porridge|flakes|craze|weetabix|muesli/],
+ ["Crisps & Nuts",/crisp|popcorn|tortilla chips|\bnuts\b|peanuts|cashew/],
+ ["Tins & Jars",/tin\b|tinned|beans|sweetcorn|chickpea|soup|evaporated|coconut milk|chopped tomatoes|sauce|stir in|\boil\b|flour|sugar|salt|spice|stock|jam|honey|peanut butter/],
+ ["Snacks & Sweets",/biscuit|cookie|cracker|milk chocolate|dark chocolate/],
+ ["Eggs",/\beggs?\b/],
+ ["Potatoes & Onions",/potato|onion/],
+ ["Yoghurts & Desserts",/yog|fromage|dessert|custard|trifle|mousse/],
+ ["Milk & Cheese",/milk|uht|cream\b|cheese|cheddar|babybel|brie|mozzarella|manchego|goat|halloumi|butter|spread/],
+ ["Snacks & Sweets",/chocolate|sweets|snack|cake|flapjack/],
+ ["Meat & Fish",/salmon|fish|cod|prawn|calamari|chicken|beef|mince|lamb|sausage|bacon|\bham\b|turkey|pork|steak/],
+ ["Bread & Pastries",/bread|toast|sourdough|loaf|bagel|wrap|naan|pitta|crumpet|croissant|\brolls?\b|pastr/],
+ ["Fruits & Vegetables",/banana|apple|orange|grape|berr|melon|pear|lemon|lime|avocado|mango|kiwi|plum|peach|fruit|salad|lettuce|tomato|cucumber|pepper|broccoli|carrot|mushroom|spinach|courgette|veg|garlic|ginger|herb/]
+];
+function aisleFor(name){const n=name.toLowerCase();const r=AISLE_RULES.find(([,re])=>re.test(n));return r?r[0]:"Other"}
+// Aldi UK in-store prices (pence), from aldi.co.uk catalogue, checked 14 Oct 2026
+const CAT = [
+ ["Semi Skimmed Milk","Cowbelle","4 pints",165,"Chilled"],
+ ["Semi Skimmed Milk","Cowbelle","6 pints",240,"Chilled"],
+ ["Whole Milk","Cowbelle","4 pints",165,"Chilled"],
+ ["Skimmed Milk","Cowbelle","4 pints",165,"Chilled"],
+ ["Filtered Semi Skimmed Milk","Cowbelle","3.5 pints",169,"Chilled"],
+ ["Filtered Whole Milk","Cowbelle","3.5 pints",169,"Chilled"],
+ ["Organic Semi Skimmed Milk","Cowbelle","4 pints",209,"Chilled"],
+ ["Lactose Free Milk","Cowbelle","1.75 pints",99,"Chilled"],
+ ["Chocolate Milk","Cowbelle","1.75 pints",95,"Chilled"],
+ ["Strawberry Milk","Cowbelle","1.75 pints",95,"Chilled"],
+ ["Extra Thick Milkshake","Cowbelle","330 ml",55,"Chilled"],
+ ["Semi Skimmed UHT Milk","Everyday Essentials","1.75 pints",65,"Food Cupboard"],
+ ["Skimmed UHT Milk","Everyday Essentials","1.75 pints",65,"Food Cupboard"],
+ ["Free Range Eggs","Merevale","6 pack",99,"Chilled"],
+ ["Medium Free Range Eggs","Merevale","6 pack",149,"Chilled"],
+ ["Large Free Range Eggs","Merevale","6 pack",169,"Chilled"],
+ ["Very Large Free Range Eggs","Merevale","6 pack",189,"Chilled"],
+ ["Medium Free Range Eggs","Merevale","12 pack",249,"Chilled"],
+ ["Large Free Range Eggs","Merevale","12 pack",289,"Chilled"],
+ ["Mixed Weight Free Range Eggs","Merevale","15 pack",285,"Chilled"],
+ ["Organic Eggs","Merevale","6 pack",225,"Chilled"],
+ ["Golden Yolk Free Range Eggs","Specially Selected","6 pack",199,"Chilled"],
+ ["Grated Cheddar","Everyday Essentials","500 g",285,"Chilled"],
+ ["Grated Mozzarella","Everyday Essentials","500 g",285,"Chilled"],
+ ["Cottage Cheese","Dairyly","220 g",99,"Chilled"],
+ ["Grilling Cheese","Emporium","200 g",149,"Chilled"],
+ ["Manchego","Specially Selected","175 g",299,"Chilled"],
+ ["Somerset Brie","Emporium","",169,"Chilled"],
+ ["French Goats' Cheese","Emporium","",199,"Chilled"],
+ ["Mild Cheese Spread","Emporium","",109,"Chilled"],
+ ["Squeezy Cheese","Emporium","140 g",49,"Chilled"],
+ ["Egg Noodles","Ready, Set…Cook!","410 g",109,"Chilled"],
+ ["Egg Tagliatelle","Specially Selected","500 g",139,"Food Cupboard"],
+ ["Evaporated Milk","Dessert Menu","410 g",52,"Food Cupboard"],
+ ["Chocolate Cereal (Craze)","Harvest Morn","375 g",89,"Food Cupboard"],
+ ["Milk Choc Malted Milk Biscuits","Belmont","250 g",129,"Snacks & Sweets"],
+ ["Milk Chocolate","Dairyfine","",175,"Snacks & Sweets"],
+ ["Milk Chocolate","Moser Roth","",199,"Snacks & Sweets"]
+].map((r,i)=>({id:"a"+i,name:r[0],brand:r[1],size:r[2],price:r[3],aisle:r[4]}));
+const CAT_BY_ID = Object.fromEntries(CAT.map(c=>[c.id,c]));
+
+const $ = s=>document.querySelector(s);
+const gbp = p=>"£"+(p/100).toFixed(2);
+const parsePounds = v=>{const n=parseFloat(String(v).replace(/[£,\s]/g,""));return isFinite(n)&&n>=0?Math.round(n*100):null};
+const uid = ()=>Math.random().toString(36).slice(2,9);
+const norm = s=>s.toLowerCase().replace(/[^a-z0-9 ]/g," ");
+
+// Tosie's regular items from Bring!; price null = not known yet, filled in from the shelf
+const BRING_CUSTOM = {
+ "cb1":{name:"Coconut yoghurt",price:null,aisle:"Chilled"},
+ "cb2":{name:"Cheese slices",price:null,aisle:"Chilled"},
+ "cb3":{name:"Toast bread",price:null,aisle:"Bakery"},
+ "cb4":{name:"Sourdough toast",price:null,aisle:"Bakery"},
+ "cb5":{name:"Ice lollies",price:null,aisle:"Frozen"},
+ "cb6":{name:"Fish fingers",price:null,aisle:"Frozen"},
+ "cb7":{name:"Kitchen roll",price:null,aisle:"Household & Baby"},
+ "cb8":{name:"Babybel",price:null,aisle:"Chilled"},
+ "cb9":{name:"Sweetcorn",price:null,aisle:"Food Cupboard"},
+ "cb10":{name:"Macaroni",price:null,aisle:"Food Cupboard"},
+ "cb11":{name:"Protein granola",price:null,aisle:"Food Cupboard"},
+ "cb12":{name:"Baking potatoes",price:null,aisle:"Fruit & Veg"}
+};
+const BRING_LIST = {name:"Weekly staples",items:[
+ {cref:"cb1",qty:2},{cref:"cb2",qty:1},{ref:"a22",qty:1},{cref:"cb3",qty:1},{cref:"cb4",qty:1},
+ {cref:"cb5",qty:1},{cref:"cb6",qty:1},{cref:"cb7",qty:1},{cref:"cb8",qty:1},{ref:"a0",qty:1},
+ {ref:"a24",qty:1},{cref:"cb9",qty:1},{cref:"cb10",qty:1},{cref:"cb11",qty:1},{cref:"cb12",qty:1}]};
+function addBring(st){
+  if(st.bringAdded) return st;
+  for(const [k,v] of Object.entries(BRING_CUSTOM)) if(!st.custom[k]) st.custom[k]={...v};
+  st.saved.unshift(JSON.parse(JSON.stringify(BRING_LIST)));
+  st.bringAdded=true; return st;
+}
+function exampleState(){
+  return {budget:6000,example:false,myPrices:{},custom:{},list:[],saved:[],history:[],aisles:[],itemAisle:{}};
+}
+let S = addBring(exampleState());
+let editingKey=null, store=null, saveTimer=null;
+
+// ---------- persistence & household sync ----------
+const LS_KEY="wst-state", LS_HH="wst-household";
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}}
+const MAPS=["items","myPrices","custom","itemAisle"];
+function toDoc(st){const items={};st.list.forEach((it,i)=>{items[it.key]={ref:it.ref||null,cref:it.cref||null,qty:it.qty,inTrolley:!!it.inTrolley,o:i}});
+  return {items,myPrices:st.myPrices||{},custom:st.custom||{},itemAisle:st.itemAisle||{},budget:st.budget,saved:st.saved||[],history:st.history||[],aisles:st.aisles||[],bringAdded:!!st.bringAdded}}
+function fromDoc(d){const base=exampleState();
+  const list=Object.entries(d.items||{}).map(([key,v])=>({key,ref:v.ref||undefined,cref:v.cref||undefined,qty:v.qty||1,inTrolley:!!v.inTrolley,o:v.o||0})).sort((x,y)=>x.o-y.o);
+  return Object.assign(base,{list,myPrices:d.myPrices||{},custom:d.custom||{},itemAisle:d.itemAisle||{},budget:d.budget||base.budget,saved:d.saved||[],history:d.history||[],aisles:d.aisles||[],bringAdded:!!d.bringAdded})}
+let remote=null, lastDoc=null, unsub=null, pendingRender=false, household=lsGet(LS_HH);
+function persist(){
+  lsSet(LS_KEY,JSON.stringify(S));
+  if(remote&&lastDoc){clearTimeout(saveTimer);saveTimer=setTimeout(pushRemote,200)}
+}
+function pushRemote(){
+  const cur=toDoc(S), prev=lastDoc||{}, patch={};
+  for(const k of Object.keys(cur)){
+    if(MAPS.includes(k)){const x=cur[k]||{},y=prev[k]||{};
+      for(const s of Object.keys(x)) if(JSON.stringify(x[s])!==JSON.stringify(y[s])) patch[k+"."+s]=x[s];
+      for(const s of Object.keys(y)) if(!(s in x)) patch[k+"."+s]=remote.deleteField();
+    } else if(JSON.stringify(cur[k])!==JSON.stringify(prev[k])) patch[k]=cur[k];
+  }
+  if(!Object.keys(patch).length) return;
+  lastDoc=cur;
+  remote.update(patch).catch(()=>setSync("error"));
+}
+function setSync(st){const el=$("#sync");el.dataset.state=st;
+  el.textContent={local:"This phone only",connecting:"Connecting…",synced:"Shared · up to date",offline:"Offline · will sync",error:"Sync problem"}[st]||st;}
+function isTyping(){const a=document.activeElement;return a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)}
+document.addEventListener("focusout",()=>setTimeout(()=>{if(pendingRender&&!isTyping()){pendingRender=false;render()}},50));
+const FB_V="10.12.2";
+async function connectRemote(){
+  if(unsub){unsub();unsub=null} remote=null; lastDoc=null;
+  const cfg=window.FIREBASE_CONFIG;
+  if(!household){setSync("local");return}
+  if(!cfg||!cfg.apiKey||!cfg.projectId){setSync("error");toast("The app's Firebase settings are missing");return}
+  setSync("connecting");
+  try{
+    const appMod=await import(`https://www.gstatic.com/firebasejs/${FB_V}/firebase-app.js`);
+    const fs=await import(`https://www.gstatic.com/firebasejs/${FB_V}/firebase-firestore.js`);
+    const app=appMod.getApps().length?appMod.getApp():appMod.initializeApp(cfg);
+    let db; try{db=fs.initializeFirestore(app,{localCache:fs.persistentLocalCache({tabManager:fs.persistentMultipleTabManager()})})}catch(e){db=fs.getFirestore(app)}
+    const ref=fs.doc(db,"households",household);
+    remote={update:p=>fs.updateDoc(ref,p),deleteField:fs.deleteField};
+    let checkedNew=false;
+    unsub=fs.onSnapshot(ref,{includeMetadataChanges:true},async snap=>{
+      if(!snap.exists()){
+        if(!checkedNew&&!snap.metadata.fromCache){checkedNew=true;const d=toDoc(S);try{await fs.setDoc(ref,d);lastDoc=d}catch(e){setSync("error")}}
+        return;
+      }
+      checkedNew=true;
+      const d=snap.data();
+      setSync(snap.metadata.fromCache?"offline":"synced");
+      if(snap.metadata.hasPendingWrites) return;
+      lastDoc=d; S=fromDoc(d);
+      if(!S.bringAdded){addBring(S);lsSet(LS_KEY,JSON.stringify(S));pushRemote()}
+      lsSet(LS_KEY,JSON.stringify(S));
+      if(isTyping()) pendingRender=true; else render();
+    },()=>setSync("error"));
+  }catch(e){setSync("error")}
+}
+function newCode(){const a="abcdefghjkmnpqrstuvwxyz23456789";let c="";const r=crypto.getRandomValues(new Uint8Array(24));for(const b of r)c+=a[b%a.length];return c.match(/.{1,4}/g).join("-")}
+function joinLink(){return location.origin+location.pathname+"#join="+household}
+function setHousehold(code){household=code;lsSet(LS_HH,code);connectRemote();render()}
+(function loadLocal(){const raw=lsGet(LS_KEY);if(raw){try{S=Object.assign(exampleState(),JSON.parse(raw))}catch(e){}}addBring(S)})();
+(function readJoinLink(){const m=location.hash.match(/join=([a-z0-9-]{20,})/i);if(m){history.replaceState(null,"",location.pathname);household=m[1].toLowerCase();lsSet(LS_HH,household);setTimeout(()=>toast("Joined your household list"),300)}})();
+connectRemote();
+loadLive();
+
+function renderHousehold(){
+  const box=$("#hhArea"); if(!box) return;
+  $("#hhBanner").hidden=!!household||!S.list.length&&false;
+  if(!household){
+    box.innerHTML=`<h3>Not shared yet</h3><p>Start a household list on one phone, then send the link to the other phone. You'll both see and tick off the same list.</p>
+      <div class="row"><button class="btn" id="hhStart">Start a household list</button></div>
+      <p style="margin-top:14px">Already have a code from the other phone?</p>
+      <form class="row" id="hhJoin"><input class="field mono" id="hhCode" placeholder="Paste code" aria-label="Household code" style="flex:1;min-width:0" autocapitalize="off" autocomplete="off"><button class="btn ghost">Join</button></form>`;
+    $("#hhStart").onclick=()=>{setHousehold(newCode());toast("Household list started")};
+    $("#hhJoin").onsubmit=e=>{e.preventDefault();const v=$("#hhCode").value.trim().toLowerCase().replace(/^.*join=/,"");if(v.replace(/-/g,"").length<20){toast("That code looks too short");return}setHousehold(v)};
+  } else {
+    box.innerHTML=`<h3>Shared household list</h3><p>Send this link to the other phone. Opening it joins this list. Keep it between you, as anyone with the link can see and change the list.</p>
+      <div class="code" id="hhLink"></div>
+      <div class="row"><button class="btn" id="hhShare">Send link</button><button class="btn ghost" id="hhCopy">Copy link</button><button class="btn ghost" id="hhLeave">Leave on this phone</button></div>`;
+    $("#hhLink").textContent=joinLink();
+    $("#hhShare").onclick=async()=>{try{if(navigator.share){await navigator.share({title:"Our shopping list",text:"Join our Weekly Shop Tally list",url:joinLink()});return}}catch(e){if(e&&e.name==="AbortError")return}copyLink()};
+    $("#hhCopy").onclick=copyLink;
+    const lv=$("#hhLeave"); lv.onclick=()=>{if(!lv.dataset.sure){lv.dataset.sure="1";lv.textContent="Tap again to leave";return}household=null;lsSet(LS_HH,null);connectRemote();render();toast("This phone has left the shared list")};
+  }
+}
+async function copyLink(){try{await navigator.clipboard.writeText(joinLink());toast("Link copied")}catch(e){const r=document.createRange();r.selectNodeContents($("#hhLink"));const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Link selected, copy it from here")}}
+
+// ---------- item helpers ----------
+// Live Aldi prices from prices.json (refreshed weekly). A price you typed wins until Aldi's price is newer.
+let LIVE={updatedMs:0,items:{}};
+function ownOf(v){if(v==null)return null;return typeof v==="object"?{p:v.p,t:v.t||0}:{p:v,t:0}}
+function info(it){
+  const k=it.ref||it.cref, m0=(S.itemAisle||{})[k], moved=AISLES.includes(m0)?m0:null, live=LIVE.items[k];
+  if(it.ref){const c=CAT_BY_ID[it.ref]; if(!c) return {name:"Item",brand:"",size:"",price:0,aisle:"Other",own:false};
+    const base=live&&typeof live.price==="number"?live.price:c.price, own=ownOf(S.myPrices[it.ref]);
+    const useOwn=own&&(!live||own.t>LIVE.updatedMs);
+    return {...c,price:useOwn?own.p:base,own:!!useOwn,aisle:moved||aisleFor(c.name)}}
+  const c=S.custom[it.cref]||{name:"Item",price:null};
+  const hasOwn=c.price!=null, liveOk=live&&typeof live.price==="number";
+  const useLive=liveOk&&(!hasOwn||(c.t||0)<LIVE.updatedMs);
+  const price=useLive?live.price:(hasOwn?c.price:null);
+  return {name:c.name,brand:useLive?(live.brand||""):"",size:useLive?(live.size||""):"",price:price==null?0:price,needs:price==null,aisle:moved||aisleFor(c.name),own:hasOwn&&!useLive};
+}
+function priceLabel(d){return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}
+async function loadLive(){
+  try{const r=await fetch("prices.json",{cache:"no-cache"});if(!r.ok)return;const j=await r.json();
+    LIVE={updatedMs:Date.parse(j.updated)||0,items:j.items||{}};render();}catch(e){}
+}
+function totals(){let plan=0,cart=0,needs=0;for(const it of S.list){const f=info(it);if(f.needs)needs++;const p=f.price*it.qty;plan+=p;if(it.inTrolley)cart+=p}return{plan,cart,needs}}
+function addItem(item){
+  const same=S.list.find(x=>(item.ref&&x.ref===item.ref)||(item.cref&&x.cref===item.cref));
+  if(same){same.qty+=item.qty||1}else S.list.push({key:uid(),qty:item.qty||1,inTrolley:false,...item});
+}
+function dropExample(){if(S.example){S.list=[];S.example=false}}
+
+// ---------- render ----------
+function render(){
+  $("#checkedDate").textContent=LIVE.updatedMs?priceLabel(new Date(LIVE.updatedMs)):CHECKED;
+  const {plan,cart}=totals(), b=S.budget;
+  $("#bigTotal").innerHTML=gbp(plan)+" <small>planned</small>";
+  $("#budgetVal").textContent=gbp(b).replace(".00","");
+  const needs=totals().needs;
+  $("#inTrolley").textContent=gbp(cart)+" in trolley"+(needs?" · "+needs+" need a price":"");
+  const left=b-plan; const lo=$("#leftOf");
+  lo.textContent= left>=0? gbp(left)+" left" : gbp(-left)+" over budget";
+  lo.classList.toggle("over",left<0);
+  const bar=$("#bar"); bar.classList.toggle("over",plan>b); bar.classList.toggle("warn",plan<=b&&plan>b*0.9);
+  $("#barPlan").style.width=Math.min(100,b?plan/b*100:0)+"%";
+  $("#barCart").style.width=Math.min(100,b?cart/b*100:0)+"%";
+  renderHousehold();
+
+  const area=$("#listArea"); area.innerHTML="";
+  if(!S.list.length){
+    area.innerHTML='<div class="empty"><b>Your list is empty</b>Type above to add items, or add a saved list from Saved lists.</div>';
+  }
+  document.body.classList.toggle("shop",shopMode);
+  $("#shopBar").hidden=!shopMode;
+  if(shopMode){const done=S.list.filter(x=>x.inTrolley).length;
+    $("#shopProg").textContent=`${done} of ${S.list.length} in trolley`;
+    $("#shopProgBar").style.width=(S.list.length?done/S.list.length*100:0)+"%";}
+  const groups={}; for(const it of S.list){if(it.inTrolley)continue;const a=info(it).aisle;(groups[a]=groups[a]||[]).push(it)}
+  const sections=aisleOrder().filter(a=>groups[a]).map(a=>[a,groups[a]]);
+  {const inT=S.list.filter(x=>x.inTrolley); if(inT.length) sections.push(["In trolley",inT]);
+    if(shopMode&&S.list.length&&(sections.length===1&&sections[0][0]==="In trolley")) area.insertAdjacentHTML("afterbegin",'<div class="empty"><b>Everything is in the trolley</b>Tap Finish shop to log your total.</div>');}
+  for(const [a,grp] of sections){
+    const items=grp.slice().sort((x,y)=>x.inTrolley-y.inTrolley);
+    const sec=document.createElement("div"); sec.className="aisle"+(a==="In trolley"?" trolley":"");
+    const sub=items.reduce((s,it)=>s+info(it).price*it.qty,0);
+    sec.innerHTML=`<h2><span>${a}${a==="In trolley"?" ("+items.length+")":""}</span><span class="mono">${gbp(sub)}</span></h2>`;
+    const box=document.createElement("div"); box.className="items";
+    for(const it of items){ const f=info(it);
+      const row=document.createElement("div"); row.className="item"+(it.inTrolley?" in":"");
+      row.innerHTML=`<button class="tick" aria-label="${it.inTrolley?"Take out of trolley":"Put in trolley"}"><svg viewBox="0 0 16 16" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg></button>
+        <button class="ico" tabindex="-1" aria-hidden="true">${iconFor(f)}</button>
+        <button class="name" aria-label="Edit ${esc(f.name)}"><b></b><span></span></button>
+        <div class="right"><span class="line">${f.needs?"£ ?":gbp(f.price*it.qty)}</span>
+        <div class="qty"><button aria-label="One less">−</button><span>${it.qty}</span><button aria-label="One more">+</button></div></div>`;
+      row.querySelector(".name b").textContent=f.name;
+      row.querySelector(".name span").innerHTML=f.needs?'Tap to add the shelf price<span class="tag own">add price</span>':esc([f.brand,f.size].filter(Boolean).join(" · "))+(f.own?'<span class="tag own">your price</span>':'');
+      const toggle=()=>{it.inTrolley=!it.inTrolley;if(navigator.vibrate)try{navigator.vibrate(12)}catch(e){};persist();render()};
+      row.querySelector(".tick").onclick=toggle; row.querySelector(".ico").onclick=toggle;
+      const [minus,plus]=row.querySelectorAll(".qty button");
+      minus.onclick=()=>{if(it.qty>1){it.qty--}else{S.list=S.list.filter(x=>x!==it)}persist();render()};
+      plus.onclick=()=>{it.qty++;persist();render()};
+      row.querySelector(".name").onclick=()=>{editingKey=editingKey===it.key?null:it.key;render();const i=document.getElementById("price-"+it.key);if(i)i.focus()};
+      if(editingKey===it.key){
+        const ed=document.createElement("div"); ed.className="editrow";
+        ed.innerHTML=`<label for="price-${it.key}" style="font-size:13px;color:var(--muted)">Shelf price £</label><input class="field mono" id="price-${it.key}" inputmode="decimal" placeholder="e.g. 1.49" value="${f.needs?"":(f.price/100).toFixed(2)}"><button class="btn small">Save</button>${f.own&&it.ref?'<button class="btn ghost small reset">Use Aldi price</button>':''}<button class="btn ghost small del">Remove</button>
+          <label for="aisle-${it.key}" style="font-size:13px;color:var(--muted)">Aisle</label><select class="field" id="aisle-${it.key}" style="width:auto;padding:8px 10px">${AISLES.map(a=>`<option${a===f.aisle?" selected":""}>${a}</option>`).join("")}</select>`;
+        ed.querySelector("select").onchange=e=>{S.itemAisle=S.itemAisle||{};S.itemAisle[it.ref||it.cref]=e.target.value;editingKey=null;persist();render();toast("Moved to "+e.target.value)};
+        const inp=ed.querySelector("input");
+        const save=()=>{const p=parsePounds(inp.value);if(p==null){toast("Enter a price like 1.49");return}
+          if(it.ref)S.myPrices[it.ref]={p,t:Date.now()};else{S.custom[it.cref].price=p;S.custom[it.cref].t=Date.now()} editingKey=null;persist();render();toast("Price updated")};
+        ed.querySelector(".btn:not(.ghost)").onclick=save;
+        inp.onkeydown=e=>{if(e.key==="Enter")save()};
+        const r=ed.querySelector(".reset"); if(r) r.onclick=()=>{delete S.myPrices[it.ref];editingKey=null;persist();render()};
+        ed.querySelector(".del").onclick=()=>{S.list=S.list.filter(x=>x!==it);editingKey=null;persist();render()};
+        row.appendChild(ed);
+      }
+      box.appendChild(row);
+    }
+    sec.appendChild(box); area.appendChild(sec);
+  }
+  const acts=$("#listActions"); acts.innerHTML="";
+  if(S.list.length){
+    const fin=document.createElement("button"); fin.className=shopMode?"btn":"btn ghost"; fin.textContent="Finish shop";
+    fin.onclick=()=>showConfirm("finish");
+    if(!shopMode){
+      const go=document.createElement("button"); go.className="btn"; go.textContent="Start shopping";
+      go.onclick=()=>setShop(true);
+      const clr=document.createElement("button"); clr.className="btn ghost"; clr.textContent="Clear list";
+      clr.onclick=()=>showConfirm("clear");
+      acts.append(go,fin,clr);
+    } else acts.append(fin);
+  }
+  renderAisles();
+  renderStaples();
+}
+// ---------- item pictures (hand-drawn line icons) ----------
+const ICONS={
+ milk:"M8 3h8v3l2 3v12H6V9l2-3z M6 9h12 M10 14h4",
+ egg:"M12 3c3.5 0 6 5 6 10a6 6 0 0 1-12 0c0-5 2.5-10 6-10z",
+ cheese:"M3 16l14-9 4 3v8H3z M3 16h18 M8 13.5h.1 M14 15h.1",
+ bel:"M12 6a7 6 0 1 0 .1 0z M5 12h14 M12 3v3",
+ bread:"M6 20V11a4 4 0 0 1 1-7h10a4 4 0 0 1 1 7v9z",
+ yog:"M5 7h14l-2 13H7z M4 7h16 M8 4h8v3",
+ fish:"M3 12c3-5 9-6 13-2l4-3v10l-4-3c-4 4-10 3-13-2z M8 11h.1",
+ lolly:"M8 3h8v11a4 4 0 0 1-8 0z M12 18v4",
+ roll:"M5 6a3 1.5 0 0 1 6 0v13a3 1.5 0 0 1-6 0z M13 6a3 1.5 0 0 1 6 0v13a3 1.5 0 0 1-6 0z",
+ potato:"M5 10c1-4 6-6 10-5s6 4 5 8-5 7-10 6-6-5-5-9z M10 10h.1 M14 13h.1",
+ corn:"M12 3c3 0 4 4 4 8s-1 9-4 10c-3-1-4-6-4-10s1-8 4-8z M8 14c-2-1-3 1-3 3 2 2 5 3 7 4 M16 14c2-1 3 1 3 3-2 2-5 3-7 4",
+ pasta:"M4 10a5 5 0 0 1 9 0h-3a2 2 0 0 0-3 0z M11 17a5 5 0 0 1 9 0h-3a2 2 0 0 0-3 0z",
+ cereal:"M6 3h12v18H6z M9 8h6 M9 12h6",
+ choc:"M5 4h14v16H5z M5 9.3h14 M5 14.6h14 M12 4v16",
+ biscuit:"M12 4a8 8 0 1 0 .1 0z M9 10h.1 M14 9h.1 M12 14h.1 M15 15h.1",
+ apple:"M12 7c-4-2-8 1-7 6s4 8 7 7c3 1 6-2 7-7s-3-8-7-6z M12 7c0-2 1-3 3-4",
+ can:"M6 5a6 2 0 0 0 12 0v14a6 2 0 0 1-12 0z M6 5a6 2 0 0 1 12 0",
+ bottle:"M10 3h4v4l2 3v11H8V10l2-3z",
+ meat:"M14 4a6 6 0 0 1 2 10l-7 7-3-3 7-7a6 6 0 0 1 1-7z",
+ basket:"M3 10h18l-2 10H5z M8 10l4-6 4 6"
+};
+const ICON_RULES=[["lolly",/lolly|lollies|ice cream/],["fish",/fish|salmon|cod|tuna/],["choc",/chocolate|choc/],["biscuit",/biscuit|cookie|cracker/],["yog",/yog/],
+ ["pasta",/noodle|tagliatelle|pasta|macaroni|spaghetti|penne|fusilli/],["bel",/babybel|mini cheese/],["cheese",/cheese|cheddar|brie|mozzarella|manchego|goat/],["egg",/egg/],
+ ["bread",/bread|toast|sourdough|loaf|roll\b|bagel|wrap|naan|pitta/],["roll",/kitchen roll|toilet|tissue/],["potato",/potato/],["corn",/corn/],
+ ["cereal",/cereal|granola|craze|oats|porridge|flakes/],["milk",/milk/],["meat",/chicken|beef|mince|lamb|sausage|bacon|turkey|pork|ham/]];
+function iconFor(f){const n=f.name.toLowerCase(); let k=(ICON_RULES.find(([,r])=>r.test(n))||[])[0];
+  if(!k) k={"Fruits & Vegetables":"apple","Crisps & Nuts":"basket","Tins & Jars":"can","Eggs":"egg","Potatoes & Onions":"potato","Pasta & Rice":"pasta","Meat & Fish":"meat","Juice & Drinks":"bottle","Milk & Cheese":"cheese","Yoghurts & Desserts":"yog","Household":"roll","Frozen & Convenience":"lolly","Cereals":"cereal","Snacks & Sweets":"choc","Bread & Pastries":"bread","Tea & Coffee":"bottle"}[f.aisle]||"basket";
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="${ICONS[k]}"/></svg>`;}
+
+// ---------- shop mode & aisle order ----------
+let shopMode=false, wakeLock=null;
+async function setShop(on){
+  shopMode=on; editingKey=null; $("#results").hidden=true; $("#customForm").hidden=true;
+  try{ if(on&&navigator.wakeLock){wakeLock=await navigator.wakeLock.request("screen")} else if(wakeLock){await wakeLock.release();wakeLock=null} }catch(e){wakeLock=null}
+  render(); window.scrollTo(0,0);
+}
+document.addEventListener("visibilitychange",async()=>{if(shopMode&&document.visibilityState==="visible"&&navigator.wakeLock){try{wakeLock=await navigator.wakeLock.request("screen")}catch(e){}}});
+function aisleOrder(){const o=(S.aisles||[]).filter(a=>AISLES.includes(a));for(const a of AISLES)if(!o.includes(a))o.push(a);return o}
+function renderAisles(){
+  const box=$("#aisleArea"); if(!box) return; box.innerHTML="";
+  const o=aisleOrder();
+  o.forEach((a,i)=>{const r=document.createElement("div");r.className="arow";
+    r.innerHTML=`<span class="mono">${i+1}</span><span class="an"></span><button class="btn ghost small" aria-label="Move ${a} earlier" ${i===0?"disabled":""}>↑</button><button class="btn ghost small" aria-label="Move ${a} later" ${i===o.length-1?"disabled":""}>↓</button>`;
+    r.querySelector(".an").textContent=a;
+    const [up,dn]=r.querySelectorAll("button");
+    const mv=d=>{const n=o.slice();[n[i],n[i+d]]=[n[i+d],n[i]];S.aisles=n;persist();render()};
+    up.onclick=()=>mv(-1); dn.onclick=()=>mv(1);
+    box.appendChild(r);});
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function showConfirm(kind){
+  const c=$("#confirmArea"); const {plan,cart}=totals();
+  const msg= kind==="finish"
+    ? `Log this shop at <b class="mono">${gbp(cart||plan)}</b> and clear the list? Items you didn't tick stay on for next time.`
+    : "Remove everything from this week's list? Saved lists aren't affected.";
+  c.innerHTML=`<div class="confirm"><div>${msg}</div><div class="row"><button class="btn small" id="cYes">${kind==="finish"?"Finish shop":"Clear list"}</button><button class="btn ghost small" id="cNo">Cancel</button></div></div>`;
+  $("#cNo").onclick=()=>c.innerHTML="";
+  $("#cYes").onclick=()=>{
+    if(kind==="finish"){
+      const spent=cart||plan; const wasExample=S.example;
+      if(!wasExample){S.history.unshift({date:new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short"}),spent,budget:S.budget});S.history=S.history.slice(0,12)}
+      S.list=S.list.filter(x=>!x.inTrolley).map(x=>({...x})); S.example=false; if(shopMode) setShop(false);
+      toast(wasExample?"Example cleared":"Shop logged: "+gbp(spent));
+    } else {S.list=[];S.example=false;toast("List cleared")}
+    c.innerHTML="";persist();render();
+  };
+}
+
+// ---------- search / add ----------
+const search=$("#search"), results=$("#results");
+search.addEventListener("input",()=>{
+  const q=norm(search.value).trim();
+  if(!q){results.hidden=true;return}
+  const words=q.split(/\s+/);
+  const hits=CAT.filter(c=>{const h=norm(c.name+" "+c.brand+" "+c.size);return words.every(w=>h.includes(w))}).slice(0,8);
+  const customs=Object.entries(S.custom).filter(([k,c])=>words.every(w=>norm(c.name).includes(w))).slice(0,4);
+  results.innerHTML="";
+  for(const c of hits){ const own=info({ref:c.id}).price;
+    const b=document.createElement("button"); b.className="res";
+    b.innerHTML=`<span class="n"></span><span class="p">${gbp(own!=null?own:c.price)}</span>`;
+    b.querySelector(".n").innerHTML=esc(c.name)+`<span>${esc([c.brand,c.size].filter(Boolean).join(" · "))}</span>`;
+    b.onclick=()=>{dropExample();addItem({ref:c.id});done(c.name)};
+    results.appendChild(b);
+  }
+  for(const [k,c] of customs){
+    const b=document.createElement("button"); b.className="res";
+    {const f=info({cref:k});b.innerHTML=`<span class="n"></span><span class="p">${f.needs?"£ ?":gbp(f.price)}</span>`;}
+    b.querySelector(".n").innerHTML=esc(c.name)+'<span>Your item</span>';
+    b.onclick=()=>{dropExample();addItem({cref:k});done(c.name)};
+    results.appendChild(b);
+  }
+  const add=document.createElement("button"); add.className="res custom";
+  add.innerHTML=`<span class="n">Add “${esc(search.value.trim())}” with my own price</span>`;
+  add.onclick=()=>{results.hidden=true;$("#customForm").hidden=false;$("#customName").value=search.value.trim();$("#customPrice").focus()};
+  results.appendChild(add); results.hidden=false;
+});
+function done(name){search.value="";results.hidden=true;persist();render();toast("Added "+name)}
+$("#customCancel").onclick=()=>{$("#customForm").hidden=true};
+$("#customForm").addEventListener("submit",e=>{e.preventDefault();
+  const name=$("#customName").value.trim(), p=parsePounds($("#customPrice").value);
+  if(!name){toast("Give the item a name");return} if(p==null){toast("Enter the shelf price, like 1.49");return}
+  let k=Object.keys(S.custom).find(k=>S.custom[k].name.toLowerCase()===name.toLowerCase());
+  if(k){S.custom[k].price=p;S.custom[k].t=Date.now()} else {k="c"+uid();S.custom[k]={name,price:p,t:Date.now(),aisle:guessAisle(name)}}
+  dropExample();addItem({cref:k});$("#customForm").hidden=true;$("#customPrice").value="";done(name);
+});
+function guessAisle(n){n=n.toLowerCase();
+  const m=[["Fruit & Veg",/banana|apple|orange|grape|berr|potato|onion|carrot|tomato|lettuce|cucumber|pepper|broccoli|salad|lemon|avocado|mushroom|garlic|veg|fruit|melon|pear|spinach|courgette/],
+  ["Bakery",/bread|loaf|roll|bagel|wrap|croissant|naan|pitta|muffin|bun|crumpet/],
+  ["Meat & Fish",/chicken|beef|mince|lamb|pork|sausage|bacon|fish|salmon|cod|tuna steak|prawn|turkey|steak|ham/],
+  ["Chilled",/milk|yog|cheese|butter|cream|egg|hummus|houmous|juice|labneh|halloumi/],
+  ["Frozen",/frozen|ice cream|chips|peas|fish finger/],
+  ["Drinks",/water|cola|squash|tea|coffee|lemonade/],
+  ["Household & Baby",/nappy|nappies|wipes|toilet|kitchen roll|washing|detergent|bleach|soap|shampoo|toothpaste|bin bag|foil/],
+  ["Snacks & Sweets",/crisp|biscuit|chocolate|sweet|snack|cake/]];
+  for(const [a,r] of m) if(r.test(n)) return a; return "Food Cupboard";}
+
+// ---------- budget ----------
+$("#budgetBtn").onclick=()=>{const f=$("#budgetForm");f.hidden=!f.hidden;if(!f.hidden){$("#budgetInput").value=(S.budget/100).toFixed(0);$("#budgetInput").focus()}};
+$("#budgetForm").addEventListener("submit",e=>{e.preventDefault();const p=parsePounds($("#budgetInput").value);if(!p){toast("Enter a budget, like 60");return}S.budget=p;$("#budgetForm").hidden=true;persist();render();toast("Budget set to "+gbp(p))});
+
+// ---------- staples ----------
+function renderStaples(){
+  const a=$("#staplesArea"); a.innerHTML="";
+  if(!S.saved.length){a.innerHTML='<div class="empty"><b>No saved lists yet</b>Build this week\'s list, then save it below as your weekly staples.</div>'}
+  S.saved.forEach((L,idx)=>{
+    const tot=L.items.reduce((s,it)=>s+info(it).price*it.qty,0);
+    const miss=L.items.filter(it=>info(it).needs).length;
+    const c=document.createElement("div"); c.className="card";
+    c.innerHTML=`<h3></h3><p>${L.items.length} items · about <span class="mono">${gbp(tot)}</span> at today's prices${miss?` · ${miss} still need a price`:""}</p><div class="chips"></div><div class="row"><button class="btn small add">Add to this week</button><button class="btn ghost small upd">Replace with current list</button><button class="btn ghost small del">Delete</button></div>`;
+    c.querySelector("h3").textContent=L.name;
+    const ch=c.querySelector(".chips");
+    for(const it of L.items){const s=document.createElement("span");s.className="chip";s.textContent=(it.qty>1?it.qty+"× ":"")+info(it).name;ch.appendChild(s)}
+    c.querySelector(".add").onclick=()=>{dropExample();for(const it of L.items)addItem({ref:it.ref,cref:it.cref,qty:it.qty});persist();render();switchTab("list");toast("Added "+L.name)};
+    c.querySelector(".upd").onclick=()=>{if(!S.list.length){toast("This week's list is empty");return}L.items=S.list.map(x=>({ref:x.ref,cref:x.cref,qty:x.qty}));persist();render();toast("Updated "+L.name)};
+    const del=c.querySelector(".del");
+    del.onclick=()=>{if(del.dataset.sure){S.saved.splice(idx,1);persist();render()}else{del.dataset.sure="1";del.textContent="Tap again to delete"}};
+    a.appendChild(c);
+  });
+  const h=$("#historyArea");
+  h.innerHTML=S.history.length?"":'<p class="note">When you tap Finish shop, the total is logged here so you can see your weeks against budget.</p>';
+  for(const r of S.history){const d=document.createElement("div");d.className="hrow";d.innerHTML=`<span>${esc(r.date)}</span><span class="mono ${r.spent>r.budget?"over":""}">${gbp(r.spent)} of ${gbp(r.budget).replace(".00","")}</span>`;h.appendChild(d)}
+}
+$("#newListForm").addEventListener("submit",e=>{e.preventDefault();
+  const name=$("#newListName").value.trim()||"Weekly staples";
+  if(!S.list.length){toast("Add items to this week's list first");return}
+  S.saved.push({name,items:S.list.map(x=>({ref:x.ref,cref:x.cref,qty:x.qty}))});
+  $("#newListName").value="";persist();render();toast("Saved "+name)});
+
+// ---------- tabs / toast ----------
+function switchTab(t){for(const n of ["list","staples","about"]){$("#tab-"+n).hidden=n!==t;$("#t-"+n).setAttribute("aria-selected",n===t)}window.scrollTo(0,0)}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+$("#exitShop").onclick=()=>setShop(false);
+$("#goHousehold").onclick=()=>switchTab("about");
+let tt; function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2000)}
+
+render();
+})();
+</script>
+<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}</script>
+</body>
+</html>

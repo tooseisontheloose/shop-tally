@@ -1,0 +1,308 @@
+{
+ "_note": "Products the weekly updater looks up. 'name' = exact Aldi name; 'match' = first search result whose name contains this (regex).",
+ "items": [
+  {
+   "id": "a0",
+   "q": "Semi Skimmed Milk 1.7% Fat",
+   "name": "Semi Skimmed Milk 1.7% Fat",
+   "brand": "COWBELLE",
+   "size": "2.272 l"
+  },
+  {
+   "id": "a1",
+   "q": "Semi Skimmed Milk 1.7% Fat",
+   "name": "Semi Skimmed Milk 1.7% Fat",
+   "brand": "COWBELLE",
+   "size": "3.408 l"
+  },
+  {
+   "id": "a2",
+   "q": "Whole Milk 3.6% Fat",
+   "name": "Whole Milk 3.6% Fat",
+   "brand": "COWBELLE",
+   "size": "2.272 l"
+  },
+  {
+   "id": "a3",
+   "q": "Skimmed Milk <0.5% Fat",
+   "name": "Skimmed Milk <0.5% Fat",
+   "brand": "COWBELLE",
+   "size": "2.272 l"
+  },
+  {
+   "id": "a4",
+   "q": "Filtered British Semi Skimmed Milk",
+   "name": "Filtered British Semi Skimmed Milk",
+   "brand": "COWBELLE",
+   "size": "2 l"
+  },
+  {
+   "id": "a5",
+   "q": "Filtered British Whole Milk",
+   "name": "Filtered British Whole Milk",
+   "brand": "COWBELLE",
+   "size": "2 l"
+  },
+  {
+   "id": "a6",
+   "q": "Organic Semi Skimmed Milk 1.7% Fat",
+   "name": "Organic Semi Skimmed Milk 1.7% Fat",
+   "brand": "COWBELLE",
+   "size": "2.272 l"
+  },
+  {
+   "id": "a7",
+   "q": "Lactose Free Milk",
+   "name": "Lactose Free Milk",
+   "brand": "COWBELLE",
+   "size": "1 l"
+  },
+  {
+   "id": "a8",
+   "q": "Chocolate Milk",
+   "name": "Chocolate Milk",
+   "brand": "COWBELLE",
+   "size": "1 l"
+  },
+  {
+   "id": "a9",
+   "q": "Strawberry Flavoured Milk",
+   "name": "Strawberry Flavoured Milk",
+   "brand": "COWBELLE",
+   "size": "1 l"
+  },
+  {
+   "id": "a10",
+   "q": "Strawberry Extra Thick Milkshake",
+   "name": "Strawberry Extra Thick Milkshake",
+   "brand": "COWBELLE",
+   "size": "330 ml"
+  },
+  {
+   "id": "a11",
+   "q": "Semi Skimmed UHT Milk",
+   "name": "Semi Skimmed UHT Milk",
+   "brand": "EVERYDAY ESSENTIALS",
+   "size": "1 l"
+  },
+  {
+   "id": "a12",
+   "q": "Skimmed UHT Milk",
+   "name": "Skimmed UHT Milk",
+   "brand": "EVERYDAY ESSENTIALS",
+   "size": "1 l"
+  },
+  {
+   "id": "a13",
+   "q": "Free Range Eggs 6 Pack",
+   "name": "Free Range Eggs 6 Pack",
+   "brand": "MEREVALE"
+  },
+  {
+   "id": "a14",
+   "q": "British Medium Free Range Eggs 6 Pack",
+   "name": "British Medium Free Range Eggs 6 Pack",
+   "brand": "MEREVALE"
+  },
+  {
+   "id": "a15",
+   "q": "British Large Free Range Eggs 6 Pack",
+   "name": "British Large Free Range Eggs 6 Pack",
+   "brand": "MEREVALE"
+  },
+  {
+   "id": "a16",
+   "q": "British Very Large Free Range Eggs 6 Pack",
+   "name": "British Very Large Free Range Eggs 6 Pack",
+   "brand": "MEREVALE"
+  },
+  {
+   "id": "a17",
+   "q": "British Medium Free Range Eggs 12 Pack",
+   "name": "British Medium Free Range Eggs 12 Pack",
+   "brand": "MEREVALE"
+  },
+  {
+   "id": "a18",
+   "q": "British Large Free Range Eggs 12 Pack",
+   "name": "British Large Free Range Eggs 12 Pack",
+   "brand": "MEREVALE"
+  },
+  {
+   "id": "a19",
+   "q": "British Free Range Mixed Weight Eggs 15 Pack",
+   "name": "British Free Range Mixed Weight Eggs 15 Pack",
+   "brand": "MEREVALE"
+  },
+  {
+   "id": "a20",
+   "q": "British Organic Eggs 6 Pack",
+   "name": "British Organic Eggs 6 Pack",
+   "brand": "MEREVALE"
+  },
+  {
+   "id": "a21",
+   "q": "British Free Range Golden Yolk Eggs 6 Pack",
+   "name": "British Free Range Golden Yolk Eggs 6 Pack",
+   "brand": "SPECIALLY SELECTED"
+  },
+  {
+   "id": "a22",
+   "q": "Grated Cheddar Cheese",
+   "name": "Grated Cheddar Cheese",
+   "brand": "EVERYDAY ESSENTIALS",
+   "size": "500 g"
+  },
+  {
+   "id": "a23",
+   "q": "Grated Mozzarella Cheese",
+   "name": "Grated Mozzarella Cheese",
+   "brand": "EVERYDAY ESSENTIALS",
+   "size": "500 g"
+  },
+  {
+   "id": "a24",
+   "q": "Cottage Cheese",
+   "name": "Cottage Cheese",
+   "size": "220 g"
+  },
+  {
+   "id": "a25",
+   "q": "Classic Grilling Cheese",
+   "name": "Classic Grilling Cheese",
+   "brand": "EMPORIUM"
+  },
+  {
+   "id": "a26",
+   "q": "Manchego Cheese D.O.P.",
+   "name": "Manchego Cheese D.O.P.",
+   "brand": "SPECIALLY SELECTED"
+  },
+  {
+   "id": "a27",
+   "q": "Somerset Brie Cheese",
+   "name": "Somerset Brie Cheese",
+   "brand": "EMPORIUM"
+  },
+  {
+   "id": "a28",
+   "q": "French Goats' Cheese",
+   "name": "French Goats' Cheese",
+   "brand": "EMPORIUM"
+  },
+  {
+   "id": "a29",
+   "q": "Mild Cheese Spread",
+   "name": "Mild Cheese Spread",
+   "brand": "EMPORIUM"
+  },
+  {
+   "id": "a30",
+   "q": "Squeezy Cheese",
+   "name": "Squeezy Cheese",
+   "brand": "EMPORIUM",
+   "size": "140 g"
+  },
+  {
+   "id": "a31",
+   "q": "Egg Noodles",
+   "name": "Egg Noodles",
+   "size": "410 g"
+  },
+  {
+   "id": "a32",
+   "q": "Egg Tagliatelle",
+   "name": "Egg Tagliatelle",
+   "brand": "SPECIALLY SELECTED"
+  },
+  {
+   "id": "a33",
+   "q": "Evaporated Milk",
+   "name": "Evaporated Milk"
+  },
+  {
+   "id": "a34",
+   "q": "Craze Milk Chocolate",
+   "name": "Craze Milk Chocolate",
+   "brand": "HARVEST MORN"
+  },
+  {
+   "id": "a35",
+   "q": "Milk Chocolate Malted Milk Biscuits",
+   "name": "Milk Chocolate Malted Milk Biscuits",
+   "brand": "BELMONT"
+  },
+  {
+   "id": "a36",
+   "q": "Milk Chocolate",
+   "name": "Milk Chocolate",
+   "brand": "DAIRYFINE"
+  },
+  {
+   "id": "a37",
+   "q": "Milk Chocolate",
+   "name": "Milk Chocolate",
+   "brand": "MOSER ROTH"
+  },
+  {
+   "id": "cb1",
+   "q": "coconut yogurt",
+   "match": "coconut"
+  },
+  {
+   "id": "cb2",
+   "q": "cheese slices",
+   "match": "slices"
+  },
+  {
+   "id": "cb3",
+   "q": "white bread",
+   "match": "white|toastie"
+  },
+  {
+   "id": "cb4",
+   "q": "sourdough",
+   "match": "sourdough"
+  },
+  {
+   "id": "cb5",
+   "q": "ice lollies",
+   "match": "lolly|lollies"
+  },
+  {
+   "id": "cb6",
+   "q": "fish fingers",
+   "match": "fish fingers"
+  },
+  {
+   "id": "cb7",
+   "q": "kitchen roll",
+   "match": "kitchen"
+  },
+  {
+   "id": "cb8",
+   "q": "babybel",
+   "match": "babybel"
+  },
+  {
+   "id": "cb9",
+   "q": "sweetcorn",
+   "match": "sweetcorn"
+  },
+  {
+   "id": "cb10",
+   "q": "macaroni",
+   "match": "macaroni"
+  },
+  {
+   "id": "cb11",
+   "q": "protein granola",
+   "match": "granola"
+  },
+  {
+   "id": "cb12",
+   "q": "baking potatoes",
+   "match": "potato"
+  }
+ ]
+}
