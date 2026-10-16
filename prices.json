@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-14T12:00:08.424Z",
+ "updated": "2026-10-16T10:01:50.038Z",
  "source": "aldi.co.uk catalogue",
  "items": {
   "a0": {
@@ -193,98 +193,98 @@
   "cb1": {
    "price": 119,
    "sku": "000000000423413011",
+   "image": "9aadbf13-b822-46f3-b9fc-ccf04e311dff/brooklea-coconut-greek-style-yogurt",
    "name": "Coconut Greek Style Yogurt",
    "brand": "Brooklea",
-   "size": "",
-   "image": "9aadbf13-b822-46f3-b9fc-ccf04e311dff/brooklea-coconut-greek-style-yogurt"
+   "size": ""
   },
   "cb2": {
    "price": 99,
    "sku": "000000000282227001",
+   "image": "58fc1778-f391-49b2-a544-958a8adcc426/emporium-cheese-slices-8-pack",
    "name": "Cheese Slices 8 Pack",
    "brand": "Emporium",
-   "size": "",
-   "image": "58fc1778-f391-49b2-a544-958a8adcc426/emporium-cheese-slices-8-pack"
+   "size": ""
   },
   "cb3": {
    "price": 75,
    "sku": "000000000000382252",
+   "image": "04fc96cd-3fc4-471e-8462-997591c906b5/village-bakery-white-toastie-sliced-loaf",
    "name": "White Toastie Sliced Loaf",
    "brand": "Village Bakery",
-   "size": "800 g",
-   "image": "04fc96cd-3fc4-471e-8462-997591c906b5/village-bakery-white-toastie-sliced-loaf"
+   "size": "800 g"
   },
   "cb4": {
    "price": 189,
    "sku": "000000000386637001",
+   "image": "3fa00468-346b-4947-941e-29cf17b4dcd7/specially-selected-white-sourdough-sliced-loaf",
    "name": "White Sourdough Sliced Loaf",
    "brand": "Specially Selected",
-   "size": "500 g",
-   "image": "3fa00468-346b-4947-941e-29cf17b4dcd7/specially-selected-white-sourdough-sliced-loaf"
+   "size": "500 g"
   },
   "cb5": {
    "price": 139,
    "sku": "000000000000634326",
+   "image": "76ded37f-59ff-4c72-a12c-3d821feacda5/gianni-s-rocket-lollies-8-pack",
    "name": "Rocket Lollies 8 Pack",
    "brand": "Gianni's",
-   "size": "464 ml",
-   "image": "76ded37f-59ff-4c72-a12c-3d821feacda5/gianni-s-rocket-lollies-8-pack"
+   "size": "464 ml"
   },
   "cb6": {
    "price": 80,
    "sku": "000000000000473275",
+   "image": "1a4a120d-4c87-4a79-911e-59ae600b0462/everyday-essentials-fish-fingers-10-pack",
    "name": "Fish Fingers 10 Pack",
    "brand": "Everyday Essentials",
-   "size": "250 g",
-   "image": "1a4a120d-4c87-4a79-911e-59ae600b0462/everyday-essentials-fish-fingers-10-pack"
+   "size": "250 g"
   },
   "cb7": {
    "price": 115,
    "sku": "000000000000648594",
+   "image": "af9ceeed-90a3-4804-82ce-d3af68b8d002/everyday-essentials-jumbo-kitchen-towel",
    "name": "Jumbo Kitchen Towel",
    "brand": "Everyday Essentials",
-   "size": "240 Sheets",
-   "image": "af9ceeed-90a3-4804-82ce-d3af68b8d002/everyday-essentials-jumbo-kitchen-towel"
+   "size": "240 Sheets"
   },
   "cb8": {
    "price": 289,
    "sku": "000000000622124001",
+   "image": "3557e017-30bf-41f3-bcc4-143b78306506/babybel-original-mini-babybels-10-pack",
    "name": "Original Mini Babybels 10 Pack",
    "brand": "Babybel",
-   "size": "200 g",
-   "image": "3557e017-30bf-41f3-bcc4-143b78306506/babybel-original-mini-babybels-10-pack"
+   "size": "200 g"
   },
   "cb9": {
    "price": 55,
    "sku": "000000000000274512",
+   "image": "ce5cdc3c-0b01-4841-9815-c5896067d635/four-seasons-supersweet-sweetcorn-in-water",
    "name": "Supersweet Sweetcorn in Water",
    "brand": "Four Seasons",
-   "size": "285 g",
-   "image": "ce5cdc3c-0b01-4841-9815-c5896067d635/four-seasons-supersweet-sweetcorn-in-water"
+   "size": "285 g"
   },
   "cb10": {
    "price": 69,
    "sku": "000000000000308242",
+   "image": "3b2fda96-f8d0-4a89-860b-10f6c99fe6b3/cucina-macaroni-pasta-500g",
    "name": "Macaroni Pasta 500g",
    "brand": "Cucina",
-   "size": "500 g",
-   "image": "3b2fda96-f8d0-4a89-860b-10f6c99fe6b3/cucina-macaroni-pasta-500g"
+   "size": "500 g"
   },
   "cb11": {
    "price": 249,
    "sku": "000000000527747001",
+   "image": "782f6c4b-3d27-426a-89f4-4efc43e19bfc/harvest-morn-chocolate-protein-granola",
    "name": "Chocolate Protein Granola",
    "brand": "Harvest Morn",
-   "size": "400 g",
-   "image": "5017a85a-1c57-4fa4-a676-045b39b3fe76/harvest-morn-chocolate-protein-granola"
+   "size": "400 g"
   },
   "cb12": {
    "price": 24,
    "sku": "000000000000339756",
+   "image": "51814ccd-c642-4601-a54f-192feeac108d/nature-s-pick-baking-potato",
    "name": "Baking Potato",
    "brand": "Nature's Pick",
-   "size": "1 Each",
-   "image": "51814ccd-c642-4601-a54f-192feeac108d/nature-s-pick-baking-potato"
+   "size": "1 Each"
   }
  }
 }
