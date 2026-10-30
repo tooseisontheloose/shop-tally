@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T10:15:29.808Z",
+ "updated": "2026-10-30T11:35:41.984Z",
  "source": "aldi.co.uk catalogue",
  "items": {
   "a0": {
@@ -78,12 +78,12 @@
    "image": "5a12d16b-7c31-4f4a-be67-fcc7a0caeb0c/merevale-british-medium-free-range-eggs-6-pack"
   },
   "a15": {
-   "price": 169,
+   "price": 179,
    "sku": "000000000000416688",
    "image": "d3363773-e6f5-4cf2-85f9-40baa5784f92/merevale-british-large-free-range-eggs-6-pack"
   },
   "a16": {
-   "price": 189,
+   "price": 199,
    "sku": "000000000000417638",
    "image": "c53244c7-ab00-4b40-92ca-c88931d2a923/merevale-british-very-large-free-range-eggs-6-pack"
   },
@@ -166,7 +166,7 @@
    "image": "967e2f79-2ee8-4530-8cc8-9da499c32a3c/specially-selected-egg-tagliatelle"
   },
   "a33": {
-   "price": 52,
+   "price": 49,
    "sku": "000000000000335591",
    "image": "b37d6374-3e77-47e7-b1ee-373dab35162f/dessert-menu-evaporated-milk"
   },
@@ -196,7 +196,7 @@
    "image": "9aadbf13-b822-46f3-b9fc-ccf04e311dff/brooklea-coconut-greek-style-yogurt",
    "name": "Coconut Greek Style Yogurt",
    "brand": "Brooklea",
-   "size": ""
+   "size": "450 g"
   },
   "cb2": {
    "price": 99,
@@ -204,7 +204,7 @@
    "image": "58fc1778-f391-49b2-a544-958a8adcc426/emporium-cheese-slices-8-pack",
    "name": "Cheese Slices 8 Pack",
    "brand": "Emporium",
-   "size": ""
+   "size": "200 g"
   },
   "cb3": {
    "price": 75,
@@ -284,7 +284,7 @@
    "image": "51814ccd-c642-4601-a54f-192feeac108d/nature-s-pick-baking-potato",
    "name": "Baking Potato",
    "brand": "Nature's Pick",
-   "size": ""
+   "size": "1 Each"
   }
  }
 }
