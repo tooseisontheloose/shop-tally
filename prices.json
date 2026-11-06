@@ -1,9 +1,9 @@
 {
- "updated": "2026-10-30T11:35:41.984Z",
+ "updated": "2026-11-06T13:08:34.350Z",
  "source": "aldi.co.uk catalogue",
  "items": {
   "a0": {
-   "price": 165,
+   "price": 175,
    "sku": "000000000000416770",
    "image": "c8b92940-471c-4eff-934e-2776c1b922fb/cowbelle-semi-skimmed-milk-1-7-fat"
   },
@@ -13,12 +13,12 @@
    "image": "fa1bf699-a7a0-40fe-9362-1ce0e46f7434/cowbelle-semi-skimmed-milk-1-7-fat"
   },
   "a2": {
-   "price": 165,
+   "price": 175,
    "sku": "000000000000416772",
    "image": "cf896a43-3b9a-4396-97d3-86ffba627c76/cowbelle-whole-milk-3-6-fat"
   },
   "a3": {
-   "price": 165,
+   "price": 175,
    "sku": "000000000000416864",
    "image": "0fdfa0f4-3845-46af-94f6-9dc8bf11d285/cowbelle-skimmed-milk-0-5-fat"
   },
@@ -171,7 +171,7 @@
    "image": "b37d6374-3e77-47e7-b1ee-373dab35162f/dessert-menu-evaporated-milk"
   },
   "a34": {
-   "price": 89,
+   "price": 95,
    "sku": "000000000000307869",
    "image": "521be233-acfa-4008-9bce-4f826e472dcd/harvest-morn-craze-milk-chocolate"
   },
@@ -223,7 +223,7 @@
    "size": "500 g"
   },
   "cb5": {
-   "price": 139,
+   "price": 135,
    "sku": "000000000000634326",
    "image": "76ded37f-59ff-4c72-a12c-3d821feacda5/gianni-s-rocket-lollies-8-pack",
    "name": "Rocket Lollies 8 Pack",
